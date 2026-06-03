@@ -1,0 +1,631 @@
+<form data-validateon="section" id="{{componentId}}-{{sectionId}}-form">
+<fieldset id="{{componentId}}-{{sectionId}}-fieldset">
+    {% include 'common/ms/form.html' %}
+    <div id="{{componentId}}-{{sectionId}}-components-form" hidden>
+    </div>
+    <div id="{{componentId}}-{{sectionId}}-packages-form" hidden>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'organisations',
+                        'fieldLabel'                     : 'Select Organisation',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select organisation to view/change settings.',
+                        'fieldBazScan'                   : true,
+                        'fieldRequired'                  : true,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Options'        : organisations,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div id="lr" hidden>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_header_left_text',
+                            'fieldLabel'                     : 'LR Header Left Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Header Left Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_header_center_text',
+                            'fieldLabel'                     : 'LR Header Center Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Header Center Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_header_right_text',
+                            'fieldLabel'                     : 'LR Header Right Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Header Right Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_table_columns_to_show',
+                            'fieldLabel'                     : 'LR Table Columns to Show',
+                            'fieldType'                      : 'select2',
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Show/hide table columns.',
+                            'fieldBazScan'                   : true,
+                            'fieldRequired'                  : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldSelect2AdditionalClass'    : 'settingsinput',
+                            'fieldDataSelect2Options'        : {
+                                'qty' : {
+                                    'id'    : 'qty',
+                                    'name'  : 'Quantity'
+                                },
+                                'qty_uom' : {
+                                    'id'    : 'qty_uom',
+                                    'name'  : 'Quantity UoM'
+                                },
+                                'rate' : {
+                                    'id'    : 'rate',
+                                    'name'  : 'Rate'
+                                },
+                                'rate_uom' : {
+                                    'id'    : 'rate_uom',
+                                    'name'  : 'Rate UoM'
+                                },
+                                'amount' : {
+                                    'id'    : 'amount',
+                                    'name'  : 'Amount'
+                                }
+                            },
+                            'fieldDataSelect2OptionsKey'     : 'id',
+                            'fieldDataSelect2OptionsValue'   : 'name',
+                            'fieldDataSelect2Multiple'       : true,
+                            'fieldDataSelect2OptionsArray'   : true,
+                            'fieldDataSelect2OptionsSelected': ['qty', 'qty_uom']
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_footer_left_text',
+                            'fieldLabel'                     : 'LR Footer Left Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Footer Left Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_footer_center_text',
+                            'fieldLabel'                     : 'LR Footer Center Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Footer Center Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_footer_right_text',
+                            'fieldLabel'                     : 'LR Footer Right Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'LR Footer Right Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_bcc_emails',
+                            'fieldLabel'                     : 'BCC All LR Emails to',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'BCC All LR Emails to (comma separated)',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'lr_print_copies',
+                            'fieldLabel'                     : 'Copies of LR to Print',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Comma separated & Colon separated. Example: driver:yellow, will produce a copy for driver in color yellow.',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+        </div>
+        <div id="invoice" hidden>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_header_left_text',
+                            'fieldLabel'                     : 'Invoice Header Left Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Header Left Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_header_center_text',
+                            'fieldLabel'                     : 'Invoice Header Center Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Header Center Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_header_right_text',
+                            'fieldLabel'                     : 'Invoice Header Right Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Header Right Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_table_columns_to_show',
+                            'fieldLabel'                     : 'Invoice Table Columns to Show',
+                            'fieldType'                      : 'select2',
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Show/hide table columns.',
+                            'fieldBazScan'                   : true,
+                            'fieldRequired'                  : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldSelect2AdditionalClass'    : 'settingsinput',
+                            'fieldDataSelect2Options'        : {
+                                'qty' : {
+                                    'id'    : 'qty',
+                                    'name'  : 'Quantity'
+                                },
+                                'qty_uom' : {
+                                    'id'    : 'qty_uom',
+                                    'name'  : 'Quantity UoM'
+                                },
+                                'rate' : {
+                                    'id'    : 'rate',
+                                    'name'  : 'Rate'
+                                },
+                                'rate_uom' : {
+                                    'id'    : 'rate_uom',
+                                    'name'  : 'Rate UoM'
+                                },
+                                'amount' : {
+                                    'id'    : 'amount',
+                                    'name'  : 'Amount'
+                                }
+                            },
+                            'fieldDataSelect2OptionsKey'     : 'id',
+                            'fieldDataSelect2OptionsValue'   : 'name',
+                            'fieldDataSelect2Multiple'       : true,
+                            'fieldDataSelect2OptionsArray'   : true,
+                            'fieldDataSelect2OptionsSelected': ['qty', 'qty_uom']
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_footer_left_text',
+                            'fieldLabel'                     : 'Invoice Footer Left Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Footer Left Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_footer_center_text',
+                            'fieldLabel'                     : 'Invoice Footer Center Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Footer Center Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_footer_right_text',
+                            'fieldLabel'                     : 'Invoice Footer Right Text',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Footer Right Text',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_sender',
+                            'fieldLabel'                     : 'Invoice Senders email and name',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Senders email and name. Format: email|name.',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_bcc_emails',
+                            'fieldLabel'                     : 'BCC All Invoice Emails to',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 1024,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'BCC All Invoice Emails to (comma separated)',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {{adminltetags.useTag('fields',
+                        [
+                            'component'                      : component,
+                            'componentName'                  : componentName,
+                            'componentId'                    : componentId,
+                            'sectionId'                      : sectionId,
+                            'fieldId'                        : 'invoice_format',
+                            'fieldLabel'                     : 'Invoice Format',
+                            'fieldType'                      : 'input',
+                            'fieldDataInputMaxLength'        : 100,
+                            'fieldHelp'                      : true,
+                            'fieldHelpTooltipContent'        : 'Invoice Format. Example: {invoice_no}/{financial_year} will output 1/26-27',
+                            'fieldInputAdditionalClass'      : 'settingsinput',
+                            'fieldBazScan'                   : true,
+                            'fieldBazPostOnCreate'           : false,
+                            'fieldBazPostOnUpdate'           : false,
+                            'fieldValue'                     : ''
+                        ]
+                    )}}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+</form>
+<script>
+/* globals BazContentFields PNotify Swal dataCollection dataCollectionComponent dataCollectionSection dataCollectionSectionForm */
+
+if (!dataCollectionSectionForm['vars']) {
+    dataCollectionSectionForm['vars'] = { };
+}
+if (!dataCollectionSectionForm['funcs']) {
+    dataCollectionSectionForm['funcs'] = { };
+}
+
+dataCollectionSectionForm['vars']['packageSettings'] = { };
+
+dataCollectionSection =
+    $.extend(dataCollectionSection, {
+        '{{componentId}}-{{sectionId}}-organisations'                       : {
+            placeholder : 'SELECT ORGANISATION TO CHANGE SETTINGS',
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-usedModules').on('select2:select', function(e) {
+                    $('#{{componentId}}-{{sectionId}}-organisations').val(0).trigger('change');
+                    $('#lr').attr('hidden', true);
+                    $('#invoice').attr('hidden', true);
+                });
+
+                if (!dataCollectionSectionForm['vars']['packageSettings']['organisations']) {
+                    dataCollectionSectionForm['vars']['packageSettings']['organisations'] = { };
+                }
+
+                $('#{{componentId}}-{{sectionId}}-organisations').on('select2:select', function(e) {
+                    $('.settingsinput').each(function(index, settinginput) {
+                        var inputId = $(settinginput)[0].id.replace('{{componentId}}-{{sectionId}}-', '');
+
+                        if (inputId) {
+                            if ($(settinginput).prop('tagName') === 'INPUT') {
+                                $(settinginput).val('');
+                            } else if ($(settinginput).prop('tagName') === 'SELECT') {
+                                $(settinginput).val(0).trigger('change');
+                            }
+                        }
+                    });
+
+                    var packageType = dataCollectionSectionForm['vars']['usedModules']['packages']['childs'][$('#{{componentId}}-{{sectionId}}-usedModules').val()]['name'];
+
+                    if (dataCollectionSectionForm['vars']['usedModules']['packages']['childs'][$('#{{componentId}}-{{sectionId}}-usedModules').val()]['settings']
+                    ) {
+                        dataCollectionSectionForm['vars']['packageSettings'] =
+                            dataCollectionSectionForm['vars']['usedModules']['packages']['childs'][$('#{{componentId}}-{{sectionId}}-usedModules').val()]['settings'];
+                    }
+                    var organisationSettings;
+
+                    if (!dataCollectionSectionForm['vars']['packageSettings']['organisations'][e.params.data.id]) {
+                        organisationSettings = dataCollectionSectionForm['vars']['packageSettings']['organisations'][e.params.data.id] = { };
+                    } else {
+                        organisationSettings = dataCollectionSectionForm['vars']['packageSettings']['organisations'][e.params.data.id];
+                    }
+
+                    if (Object.keys(organisationSettings).length > 0) {
+                        for (var organisationSetting in organisationSettings) {
+                            if ($('#{{componentId}}-{{sectionId}}-' + organisationSetting).prop('tagName') === 'INPUT') {
+                                $('#{{componentId}}-{{sectionId}}-' + organisationSetting).val(organisationSettings[organisationSetting]);
+                            } else if ($('#{{componentId}}-{{sectionId}}-' + organisationSetting).prop('tagName') === 'SELECT') {
+
+                                $('#{{componentId}}-{{sectionId}}-' + organisationSetting).val(Object.values(organisationSettings[organisationSetting])).trigger('change');
+                            }
+                        }
+                    }
+
+                    if (packageType === 'JobsLrs') {
+                        $('#lr').attr('hidden', false);
+                    } else if (packageType === 'JobsInvoices') {
+                        $('#invoice').attr('hidden', false);
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-lr_header_left_text'                 : { },
+        '{{componentId}}-{{sectionId}}-lr_header_center_text'               : { },
+        '{{componentId}}-{{sectionId}}-lr_header_right_text'                : { },
+        '{{componentId}}-{{sectionId}}-lr_footer_left_text'                 : { },
+        '{{componentId}}-{{sectionId}}-lr_footer_center_text'               : { },
+        '{{componentId}}-{{sectionId}}-lr_footer_right_text'                : { },
+        '{{componentId}}-{{sectionId}}-lr_table_columns_to_show'            : {
+            placeholder: "SELECT LR TABLE COLUMNS TO SHOW"
+        },
+        '{{componentId}}-{{sectionId}}-lr_bcc_emails'                       : { },
+        '{{componentId}}-{{sectionId}}-lr_print_copies'                     : { },
+        '{{componentId}}-{{sectionId}}-invoice_header_left_text'            : { },
+        '{{componentId}}-{{sectionId}}-invoice_header_center_text'          : { },
+        '{{componentId}}-{{sectionId}}-invoice_header_right_text'           : { },
+        '{{componentId}}-{{sectionId}}-invoice_footer_left_text'            : { },
+        '{{componentId}}-{{sectionId}}-invoice_footer_center_text'          : { },
+        '{{componentId}}-{{sectionId}}-invoice_footer_right_text'           : { },
+        '{{componentId}}-{{sectionId}}-invoice_table_columns_to_show'       : {
+            placeholder: "SELECT LR TABLE COLUMNS TO SHOW"
+        },
+        '{{componentId}}-{{sectionId}}-invoice_sender'                      : { },
+        '{{componentId}}-{{sectionId}}-invoice_bcc_emails'                  : { },
+        '{{componentId}}-{{sectionId}}-invoice_format'                      : { },
+        '{{componentId}}-{{sectionId}}-form'                                : {
+            rules: {
+            },
+            messages: {
+            },
+            onSubmit: function() {
+                $('.settingsinput').each(function(index, settinginput) {
+                    var inputId = $(settinginput)[0].id.replace('{{componentId}}-{{sectionId}}-', '');
+
+                    if (inputId) {
+                        if ($(settinginput).prop('tagName') === 'INPUT') {
+                            dataCollectionSectionForm['vars']['packageSettings']['organisations'][$('#{{componentId}}-{{sectionId}}-organisations').val()][inputId] = $(settinginput).val();
+                        } else if ($(settinginput).prop('tagName') === 'SELECT') {
+                            dataCollectionSectionForm['vars']['packageSettings']['organisations'][$('#{{componentId}}-{{sectionId}}-organisations').val()][inputId] = $(settinginput).val();
+                        }
+                    }
+
+                    dataCollectionSection['dataToSubmit']['organisations'] = dataCollectionSectionForm['vars']['packageSettings']['organisations'];
+                });
+
+                return true;
+            }
+        }
+    });
+</script>

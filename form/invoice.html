@@ -1,0 +1,303 @@
+{% set jobDocuments = [] %}
+{% if job['documents'] is defined %}
+    {% set jobDocuments = job['documents'] %}
+{% endif %}
+{% set invoiceNo = '' %}
+{% set invoiceDate = '' %}
+{% set invoiceDueDate = '' %}
+{% set invoicePoNumber = '' %}
+{% set invoiceMaterialInvoiceNumber = '' %}
+{% set invoiceUuid = '' %}
+{% set invoiceDocument = '' %}
+{% set invoiceSignedBy = '' %}
+{% set invoiceSignedAt = '' %}
+{% set invoiceNotes = '' %}
+{% if job['invoice']['invoice_no_formatted'] is defined %}
+    {% set invoiceNo = job['invoice']['invoice_no_formatted'] %}
+{% elseif job['invoice']['invoice_no'] is defined %}
+    {% set invoiceNo = job['invoice']['invoice_no'] %}
+{% endif %}
+{% if job['invoice']['invoice_date'] is defined %}
+    {% set invoiceDate = job['invoice']['invoice_date'] %}
+{% endif %}
+{% if job['invoice']['due_date'] is defined %}
+    {% set invoiceDueDate = job['invoice']['due_date'] %}
+{% endif %}
+{% if job['invoice']['po_number'] is defined %}
+    {% set invoicePoNumber = job['invoice']['po_number'] %}
+{% endif %}
+{% if job['invoice']['material_invoice_no'] is defined %}
+    {% set invoiceMaterialInvoiceNumber = job['invoice']['material_invoice_no'] %}
+{% endif %}
+{% if job['invoice']['signed_uuid'] is defined %}
+    {% set invoiceUuid = job['invoice']['signed_uuid'] %}
+{% endif %}
+{% if job['invoice']['signed_document'] is defined %}
+    {% set invoiceDocument = job['invoice']['signed_document'] %}
+{% endif %}
+{% if job['invoice']['signed_by'] is defined %}
+    {% set invoiceSignedBy = job['invoice']['signed_by'] %}
+{% endif %}
+{% if job['invoice']['signed_at'] is defined %}
+    {% set invoiceSignedAt = job['invoice']['signed_at'] %}
+{% endif %}
+{% if job['invoice']['invoice_notes'] is defined %}
+    {% set invoiceNotes = job['invoice']['invoice_notes'] %}
+{% endif %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'invoice_no',
+                'fieldLabel'                            : 'Invoice #',
+                'fieldType'                             : 'input',
+                'fieldInputTypeTextFilter'              : 'positiveInt',
+                'fieldDataInputMaxLength'               : 6,
+                'fieldDataInputMinNumber'               : 0,
+                'fieldDataInputMaxNumber'               : 999999,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Invoice #',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'check-invoice'         : [
+                            'title'                         : false,
+                            'icon'                          : 'check',
+                            'noMargin'                      : true,
+                            'type'                          : 'success',
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ],
+                        'edit-invoice'         : [
+                            'title'                         : false,
+                            'icon'                          : 'wand-magic-sparkles',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : invoiceNo
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'invoice_date',
+                'fieldLabel'                            : 'Invoice Date',
+                'fieldType'                             : 'flatpickr',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Invoice Date',
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : invoiceDate
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'due_date',
+                'fieldLabel'                            : 'Invoice Due Date',
+                'fieldType'                             : 'flatpickr',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Invoice Due Date',
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : invoiceDueDate
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'po_number',
+                'fieldLabel'                     : 'PO #',
+                'fieldType'                      : 'input',
+                'fieldInputTypeTextFilter'       : 'positiveInt',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'PO #',
+                'fieldBazScan'                   : true,
+                'fieldBazJstreeSearch'           : true,
+                'fieldBazPostOnCreate'           : true,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : invoicePoNumber
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'material_invoice_no',
+                'fieldLabel'                     : 'Material Invoice #',
+                'fieldType'                      : 'input',
+                'fieldInputTypeTextFilter'       : 'positiveInt',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Material Invoice #',
+                'fieldBazScan'                   : true,
+                'fieldBazJstreeSearch'           : true,
+                'fieldBazPostOnCreate'           : true,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : invoiceMaterialInvoiceNumber
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'signed_uuid',
+                        'fieldLabel'                     : 'Job Documents',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'List of documents for this job.',
+                        'fieldBazScan'                   : true,
+                        'fieldBazJstreeSearch'           : true,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldGroupPostAddonButtons'      :
+                            [
+                                'extract-signature'    : [
+                                    'title'                   : false,
+                                    'size'                    : 'xs',
+                                    'disabled'                : true,
+                                    'type'                    : 'info',
+                                    'buttonAdditionalClass'   : 'rounded-0',
+                                    'icon'                    : 'signature'
+                                ]
+                            ],
+                        'fieldDataSelect2Options'        : jobDocuments,
+                        'fieldDataSelect2OptionsKey'     : 'uuid',
+                        'fieldDataSelect2OptionsValue'   : 'org_file_name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': invoiceUuid
+                    ]
+                )}}
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'signed_document',
+                'fieldLabel'                     : 'Document Signed',
+                'fieldType'                      : 'input',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Signed',
+                'fieldDisabled'                  : true,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : false,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : invoiceDocument
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'signed_by',
+                'fieldLabel'                     : 'Document Signed By',
+                'fieldType'                      : 'input',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Signed By',
+                'fieldDisabled'                  : true,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : false,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : invoiceSignedBy
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'signed_at',
+                'fieldLabel'                     : 'Document Signed At',
+                'fieldType'                      : 'input',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Signed At',
+                'fieldDisabled'                  : true,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : false,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : invoiceSignedAt
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'invoice_notes',
+                'fieldLabel'                     : 'Invoice Notes',
+                'fieldType'                      : 'textarea',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Additional notes for the invoice',
+                'fieldRequired'                  : false,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : true,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldDataInputMaxLength'        : 2048,
+                'fieldTextareaRows'              : 2,
+                'fieldValue'                     : invoiceNotes
+            ]
+        )}}
+    </div>
+</div>

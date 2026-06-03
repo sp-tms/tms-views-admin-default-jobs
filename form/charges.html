@@ -1,0 +1,386 @@
+{% if job['status'] != '1' %}
+    <div class="row">
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'charge_id',
+                    'fieldLabel'                     : 'Charge ID',
+                    'fieldType'                      : 'input',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Charge ID',
+                    'fieldRequired'                  : true,
+                    'fieldHidden'                    : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false
+                ]
+            )}}
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'charges_list',
+                    'fieldLabel'                     : 'Charge',
+                    'fieldType'                      : 'select2',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Select a charge to add to charges',
+                    'fieldRequired'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Options'        : charges,
+                    'fieldDataSelect2OptionsKey'     : 'id',
+                    'fieldDataSelect2OptionsValue'   : 'display_name',
+                    'fieldDataSelect2OptionsArray'   : true,
+                    'fieldDataSelect2OptionsSelected': ''
+                ]
+            )}}
+        </div>
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'visibility',
+                    'fieldLabel'                     : 'Visibility',
+                    'fieldType'                      : 'select2',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Charges visible on? You can either have it visible on LR, Invoice or both.',
+                    'fieldRequired'                  : true,
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Options'        :
+                    [
+                        '1'  : [
+                            'id'        : '1',
+                            'name'      : 'LR Only'
+                        ],
+                        '2'  : [
+                            'id'        : '2',
+                            'name'      : 'Invoice Only'
+                        ],
+                        '3'  : [
+                            'id'        : '3',
+                            'name'      : 'Both LR & Invoice'
+                        ]
+                    ],
+                    'fieldDataSelect2OptionsKey'     : 'id',
+                    'fieldDataSelect2OptionsValue'   : 'name',
+                    'fieldDataSelect2OptionsArray'   : true,
+                    'fieldDataSelect2OptionsSelected': ''
+                ]
+            )}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'qty',
+                    'fieldLabel'                     : 'Quantity',
+                    'fieldType'                      : 'input',
+                    'fieldInputTypeTextFilter'       : 'positiveFloat',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Quantity of charge',
+                    'fieldDataInputMaxLength'        : 10,
+                    'fieldDataInputMinNumber'        : 0,
+                    'fieldDataInputMaxNumber'        : 9999999999,
+                    'fieldRequired'                  : false,
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldValue'                     : ''
+                ]
+            )}}
+        </div>
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'qty_uom',
+                    'fieldLabel'                     : 'Qty Uom',
+                    'fieldType'                      : 'select2',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Select unit of measurement for quantity',
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Options'        : uoms,
+                    'fieldDataSelect2OptionsKey'     : 'id',
+                    'fieldDataSelect2OptionsValue'   : 'name',
+                    'fieldDataSelect2OptionsArray'   : true,
+                    'fieldDataSelect2OptionsSelected': ''
+                ]
+            )}}
+        </div>
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'rate',
+                    'fieldLabel'                     : 'Rate',
+                    'fieldType'                      : 'input',
+                    'fieldGroupPreAddonText'         : currencySymbol,
+                    'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                    'fieldDataInputMaxLength'        : 10,
+                    'fieldDataInputMinNumber'        : 0,
+                    'fieldDataInputMaxNumber'        : 9999999999,
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Rate',
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldValue'                     : ''
+                ]
+            )}}
+        </div>
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'rate_uom',
+                    'fieldLabel'                     : 'Rate Uom',
+                    'fieldType'                      : 'select2',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Select unit of measurement for rate',
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Options'        : uoms,
+                    'fieldDataSelect2OptionsKey'     : 'id',
+                    'fieldDataSelect2OptionsValue'   : 'name',
+                    'fieldDataSelect2OptionsArray'   : true,
+                    'fieldDataSelect2OptionsSelected': ''
+                ]
+            )}}
+        </div>
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'amount',
+                    'fieldLabel'                     : 'Amount',
+                    'fieldType'                      : 'input',
+                    'fieldInputToggleEdit'           : true,
+                    'fieldGroupPreAddonText'         : currencySymbol,
+                    'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                    'fieldDataInputMaxLength'        : 20,
+                    'fieldDataInputMinNumber'        : 0,
+                    'fieldDataInputMaxNumber'        : 99999999999999,
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Amount',
+                    'fieldRequired'                  : true,
+                    'fieldDisabled'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : false,
+                    'fieldBazPostOnUpdate'           : false,
+                    'fieldValue'                     : ''
+                ]
+            )}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {{adminltetags.useTag('buttons',
+                [
+                    'componentId'           : componentId,
+                    'sectionId'             : sectionId,
+                    'buttonType'            : 'button',
+                    'buttons'               :
+                        [
+                            'charges-add' : [
+                                'title'                   : 'Add',
+                                'position'                : 'right',
+                                'disabled'                : true,
+                                'icon'                    : 'cog fa-spin',
+                                'iconHidden'              : true,
+                                'buttonAdditionalClass'   : 'text-white',
+                                'size'                    : 'sm'
+                            ],
+                            'charges-update' : [
+                                'title'                   : 'Update',
+                                'position'                : 'right',
+                                'hidden'                  : true,
+                                'icon'                    : 'cog fa-spin',
+                                'iconHidden'              : true,
+                                'buttonAdditionalClass'   : 'text-white',
+                                'disabled'                : true,
+                                'size'                    : 'sm'
+                            ],
+                            'charges-cancel' : [
+                                'title'                   : 'Cancel',
+                                'type'                    : 'secondary',
+                                'buttonAdditionalClass'   : 'text-white',
+                                'position'                : 'right',
+                                'size'                    : 'sm'
+                            ]
+                        ]
+                ]
+            )}}
+        </div>
+    </div>
+    <hr>
+{% endif %}
+{% set tableData = '' %}
+{% if job['charges'] is defined and job['charges']|length > 0 %}
+    {% for charge in job['charges'] %}
+        {% set tableData = tableData ~ '<tr id="' ~ charge['id'] ~ '">' %}
+            {% if charges is defined and charges[charge['charge_id']] is defined %}
+                {% set tableData = tableData ~ '<td>' ~ charges[charge['charge_id']]['display_name'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>UNKNOWN</td>' %}
+                {% set tableData = tableData ~ '<td>UNKNOWN</td>' %}
+            {% endif %}
+            {% if charge['visibility'] %}
+                {% if charge['visibility'] == '1' %}
+                    {% set tableData = tableData ~ '<td>LR Only</td>' %}
+                {% elseif charge['visibility'] == '2' %}
+                    {% set tableData = tableData ~ '<td>Invoice Only</td>' %}
+                {% elseif charge['visibility'] == '3' %}
+                    {% set tableData = tableData ~ '<td>Both LR & Invoice</td>' %}
+                {% endif %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if charge['quantity'] %}
+                {% set tableData = tableData ~ '<td>' ~ charge['quantity'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if charge['quantity_uom_id'] %}
+                {% if uoms is defined and uoms[charge['quantity_uom_id']] is defined %}
+                    {% set tableData = tableData ~ '<td>' ~ uoms[charge['quantity_uom_id']]['name'] ~ '</td>' %}
+                {% endif %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if charge['rate'] %}
+                {% set tableData = tableData ~ '<td>' ~ charge['rate'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if charge['rate_uom_id'] %}
+                {% if uoms is defined and uoms[charge['rate_uom_id']] is defined %}
+                    {% set tableData = tableData ~ '<td>' ~ uoms[charge['rate_uom_id']]['name'] ~ '</td>' %}
+                {% endif %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if charge['amount'] %}
+                {% set tableData = tableData ~ '<td>' ~ charge['amount'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if job['status'] != '1' %}
+                {% set chargesButtons = [] %}
+                {% set chargesButtons['edit-' ~ charge['id']] = [
+                        'title'                   : false,
+                        'icon'                    : 'edit',
+                        'size'                    : 'xs',
+                        'buttonAdditionalClass'   : 'editCharge text-white',
+                        'type'                    : 'warning',
+                        'data'                    : [
+                            'id'                  : charge['id']
+                        ]
+                    ]
+                %}
+                {% set chargesButtons['remove-' ~ charge['id']] = [
+                        'title'                   : false,
+                        'icon'                    : 'trash',
+                        'size'                    : 'xs',
+                        'buttonAdditionalClass'   : 'removeCharge text-white',
+                        'type'                    : 'danger',
+                        'data'                    : [
+                            'id'                  : charge['id']
+                        ]
+                    ]
+                %}
+                {% set tableData = tableData ~
+                    '<td>' ~ adminltetags.useTag('buttons',
+                                [
+                                    'component'                     : component,
+                                    'componentName'                 : componentName,
+                                    'componentId'                   : componentId,
+                                    'parentComponentId'             : parent,
+                                    'sectionId'                     : sectionId,
+                                    'buttonType'                    : 'button',
+                                    'buttons'                       : chargesButtons
+                                ]
+                            ) ~ '</td>'
+                %}
+            {% endif %}
+            {% set tableData = tableData ~ '</tr>' %}
+    {% endfor %}
+{% endif %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'charges',
+                'fieldLabel'                     : 'Charges',
+                'fieldType'                      : 'html',
+                'fieldAdditionalClass'           : 'mb-0',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'List of charges for this LR & Invoice.',
+                'fieldRequired'                  : true,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnUpdate'           : true
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <table id="{{componentId}}-{{sectionId}}-charges-table" class="table table-sm table-hover responsive nowrap mb-0" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th class="text-uppercase">Name</th>
+                    <th class="text-uppercase">Visibility</th>
+                    <th class="text-uppercase">QTY</th>
+                    <th class="text-uppercase">QTY UoM</th>
+                    <th class="text-uppercase">{{ currencySymbol }} Rate</th>
+                    <th class="text-uppercase">Rate UoM</th>
+                    <th class="text-uppercase">{{ currencySymbol }} AMOUNT</th>
+                    {% if job['status'] != '1' %}
+                        <th class="text-uppercase">ACTIONS</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>{{tableData}}</tbody>
+        </table>
+    </div>
+</div>

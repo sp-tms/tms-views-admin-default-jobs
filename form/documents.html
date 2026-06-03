@@ -1,0 +1,287 @@
+{% set jobDocuments = [] %}
+{% if job['documents'] is defined %}
+    {% set jobDocuments = job['documents'] %}
+{% endif %}
+<div class="row vdivide">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'print',
+                        'fieldLabel'                     : 'Print',
+                        'fieldType'                      : 'html',
+                        'fieldAdditionalClass'           : 'mb-0',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Print LR & Invoice.',
+                        'fieldRequired'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{adminltetags.useTag('fields',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'fieldId'                        : 'show_lr_notes',
+                                'fieldLabel'                     : false,
+                                'fieldHelp'                      : true,
+                                'fieldHelpTooltipContent'        : 'Select to show LR notes in Lorry Receipt document.',
+                                'fieldRequired'                  : false,
+                                'fieldType'                      : 'checkbox',
+                                'fieldCheckboxType'              : 'info',
+                                'fieldCheckboxLabel'             : 'LR Notes',
+                                'fieldCheckboxChecked'           : false,
+                                'fieldCheckboxAdditionClass'     : 'text-sm text-uppercase',
+                                'fieldBazPostOnCreate'           : false,
+                                'fieldBazPostOnUpdate'           : false,
+                                'fieldBazScan'                   : true
+                            ]
+                        )}}
+                    </div>
+                    <div class="col-md-6">
+                        {{adminltetags.useTag('fields',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'fieldId'                        : 'show_invoice_notes',
+                                'fieldLabel'                     : false,
+                                'fieldHelp'                      : true,
+                                'fieldHelpTooltipContent'        : 'Select to show Invoice notes in Invoice document.',
+                                'fieldRequired'                  : false,
+                                'fieldType'                      : 'checkbox',
+                                'fieldCheckboxType'              : 'info',
+                                'fieldCheckboxLabel'             : 'Invoice Notes',
+                                'fieldCheckboxChecked'           : false,
+                                'fieldCheckboxAdditionClass'     : 'text-sm text-uppercase',
+                                'fieldBazPostOnCreate'           : false,
+                                'fieldBazPostOnUpdate'           : false,
+                                'fieldBazScan'                   : true
+                            ]
+                        )}}
+                    </div>
+                    <div class="col-md-6">
+                        {{adminltetags.useTag('fields',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'fieldId'                        : 'show_organisation_pterms',
+                                'fieldLabel'                     : false,
+                                'fieldHelp'                      : true,
+                                'fieldHelpTooltipContent'        : 'Select to show organisation payment terms in Invoice document.',
+                                'fieldRequired'                  : false,
+                                'fieldType'                      : 'checkbox',
+                                'fieldCheckboxType'              : 'info',
+                                'fieldCheckboxLabel'             : 'Payment Terms (Organisation)',
+                                'fieldCheckboxChecked'           : false,
+                                'fieldCheckboxAdditionClass'     : 'text-sm text-uppercase',
+                                'fieldBazPostOnCreate'           : false,
+                                'fieldBazPostOnUpdate'           : false,
+                                'fieldBazScan'                   : true
+                            ]
+                        )}}
+                    </div>
+                    <div class="col-md-6">
+                        {{adminltetags.useTag('fields',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'fieldId'                        : 'show_customer_pterms',
+                                'fieldLabel'                     : false,
+                                'fieldHelp'                      : true,
+                                'fieldHelpTooltipContent'        : 'Select to show customer payment terms in Invoice document.',
+                                'fieldRequired'                  : false,
+                                'fieldType'                      : 'checkbox',
+                                'fieldCheckboxType'              : 'info',
+                                'fieldCheckboxLabel'             : 'Payment Terms (Customer)',
+                                'fieldCheckboxChecked'           : false,
+                                'fieldCheckboxAdditionClass'     : 'text-sm text-uppercase',
+                                'fieldBazPostOnCreate'           : false,
+                                'fieldBazPostOnUpdate'           : false,
+                                'fieldBazScan'                   : true
+                            ]
+                        )}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {{adminltetags.useTag('buttons',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'buttonType'                     : 'button',
+                                'buttons'                        :
+                                    [
+                                        'print-lr'    : [
+                                            'title'                   : 'Lorry Receipt',
+                                            'icon'                    : 'print'
+                                        ]
+                                    ]
+                            ]
+                        )}}
+                    </div>
+                    <div class="col">
+                        {{adminltetags.useTag('buttons',
+                            [
+                                'component'                      : component,
+                                'componentName'                  : componentName,
+                                'componentId'                    : componentId,
+                                'sectionId'                      : sectionId,
+                                'buttonType'                     : 'button',
+                                'buttons'                        :
+                                    [
+                                        'print-invoice'    : [
+                                            'title'                   : 'Invoice',
+                                            'icon'                    : 'print'
+                                        ]
+                                    ]
+                            ]
+                        )}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                     : component,
+                'componentName'                 : componentName,
+                'componentId'                   : componentId,
+                'sectionId'                     : sectionId,
+                'fieldId'                       : 'upload_documents',
+                'fieldType'                     : 'files/dropzone',
+                'fieldLabel'                    : false,
+                'fieldDropzoneLabel'            : 'Upload Documents',
+                'fieldRequired'                 : false,
+                'fieldHelp'                     : true,
+                'fieldHelpTooltipContent'       : 'Max: 10. Upload documents like receipts, invoices, LR pics, etc. You can zip an upload more files.',
+                'fieldAdditionalClass'          : 'mb-1',
+                'fieldBazScan'                  : true,
+                'fieldBazPostOnCreate'          : false,
+                'fieldBazPostOnUpdate'          : false,
+                'attachments'                   : [],
+                'maxAttachments'                : 10,
+                'storage'                       : storage,
+                'noPreview'                     : true,
+                'setOrphan'                     : false,
+                'upload'                        : true
+            ]
+        )}}
+    </div>
+</div>
+<hr>
+{% set tableData = '' %}
+{% if jobDocuments|length > 0 %}
+    {% for document in jobDocuments %}
+        {% set tableData = tableData ~ '<tr id="' ~ document['uuid'] ~ '">' %}
+            {% if document['org_file_name'] %}
+                {% set tableData = tableData ~ '<td>' ~ document['org_file_name'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if document['account_name'] is defined %}
+                {% set tableData = tableData ~ '<td>' ~ document['account_name'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% if document['date'] is defined %}
+                {% set tableData = tableData ~ '<td>' ~ document['date'] ~ '</td>' %}
+            {% else %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
+            {% endif %}
+            {% set documentsButtons = [] %}
+            {% set documentsButtons['download-' ~ document['uuid']] = [
+                    'title'                   : false,
+                    'icon'                    : 'download',
+                    'size'                    : 'xs',
+                    'buttonAdditionalClass'   : 'downloadDocument text-white',
+                    'url'                     : links.url('system/storages/q/uuid/' ~ document['uuid']),
+                    'data'                    : [
+                        'uuid'                  : document['uuid']
+                    ]
+                ]
+            %}
+            {% set documentsButtons['remove-' ~ document['uuid']] = [
+                    'title'                   : false,
+                    'icon'                    : 'trash',
+                    'size'                    : 'xs',
+                    'buttonAdditionalClass'   : 'removeDocument text-white',
+                    'type'                    : 'danger',
+                    'data'                    : [
+                        'uuid'                  : document['uuid']
+                    ]
+                ]
+            %}
+            {% set tableData = tableData ~
+                '<td>' ~ adminltetags.useTag('buttons',
+                            [
+                                'component'                     : component,
+                                'componentName'                 : componentName,
+                                'componentId'                   : componentId,
+                                'parentComponentId'             : parent,
+                                'sectionId'                     : sectionId,
+                                'buttonType'                    : 'button',
+                                'buttons'                       : documentsButtons
+                            ]
+                        ) ~ '</td>'
+            %}
+            {% set tableData = tableData ~ '</tr>' %}
+    {% endfor %}
+{% endif %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'documents',
+                'fieldLabel'                     : 'Job Documents',
+                'fieldType'                      : 'html',
+                'fieldAdditionalClass'           : 'mb-0',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'List of documents uploaded to this job.',
+                'fieldRequired'                  : true,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnUpdate'           : false
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <table id="{{componentId}}-{{sectionId}}-documents-table" class="table table-sm table-hover responsive nowrap mb-0" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th class="text-uppercase">Name</th>
+                    <th class="text-uppercase">Uploaded By</th>
+                    <th class="text-uppercase">Uploaded On</th>
+                    <th class="text-uppercase">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>{{tableData}}</tbody>
+        </table>
+    </div>
+</div>

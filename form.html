@@ -1,0 +1,1243 @@
+{% if job['id'] is defined %}
+    <div class="row vdivide">
+        <div class="col-md-2">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                                 : component,
+                    'componentName'                             : componentName,
+                    'componentId'                               : componentId,
+                    'sectionId'                                 : sectionId,
+                    'fieldId'                                   : 'form-fields',
+                    'fieldLabel'                                : 'Form Fields',
+                    'fieldType'                                 : 'jstree',
+                    'fieldHelp'                                 : true,
+                    'fieldHelpTooltipContent'                   : 'Form Fields',
+                    'fieldRequired'                             : false,
+                    'fieldBazScan'                              : true,
+                    'fieldJstreeSearch'                         : true,
+                    'fieldBazPostOnCreate'                      : false,
+                    'fieldBazPostOnUpdate'                      : false,
+                    'fieldJstreeDataSrcArr'                     : [],
+                    'fieldJstreeAdd'                            : false,
+                    'fieldJstreeEdit'                           : false,
+                    'fieldJstreeExpand'                         : true,
+                    'fieldJstreeCollapse'                       : true,
+                    'fieldJstreeFirstOpen'                      : true,
+                    'fieldJstreeAllOpen'                        : false,
+                    'fieldJstreeToggleAllChildren'              : false,
+                    'fieldJstreeIncludeRootInPath'              : false,
+                    'fieldJstreeSelectEndNodeOnly'              : false,
+                    'fieldJstreeShowDots'                       : false,
+                    'fieldJstreeDoubleClickToggle'              : true,
+                    'fieldJstreeMultiple'                       : false,
+                    'fieldJstreeSearchCaseSensitive'            : false,
+                    'fieldJstreeSearchShowOnlyMatches'          : false,
+                    'fieldJstreeSearchShowOnlyMatchesChildren'  : false,
+                    'fieldJstreeHideJstreeIcons'                : false
+                ]
+            )}}
+        </div>
+{% else %}
+    <div class="row">
+{% endif %}
+    <div class="col">
+        <form data-validateon="section" id="{{componentId}}-{{sectionId}}-form">
+            <fieldset id="{{componentId}}-{{sectionId}}-fieldset">
+                {% if job['id'] is defined %}
+                    {% set tabsData =
+                        [
+                            'lr'   :
+                            [
+                                'tabTitle'          : 'Lorry Receipt',
+                                'tabInclude'        : 'jobs/form/lr'
+                            ],
+                            'charges'   :
+                            [
+                                'tabTitle'          : 'Charges',
+                                'tabInclude'        : 'jobs/form/charges'
+                            ],
+                            'trip'   :
+                            [
+                                'tabTitle'          : 'Trip',
+                                'tabInclude'        : 'jobs/form/trip'
+                            ],
+                            'invoice'   :
+                            [
+                                'tabTitle'          : 'Invoice',
+                                'tabInclude'        : 'jobs/form/invoice'
+                            ],
+                            'payments'   :
+                            [
+                                'tabTitle'          : 'Payments',
+                                'tabInclude'        : 'jobs/form/payments'
+                            ],
+                            'documents'   :
+                            [
+                                'tabTitle'          : 'Documents',
+                                'tabInclude'        : 'jobs/form/documents'
+                            ],
+                            'email'   :
+                            [
+                                'tabTitle'          : 'Email',
+                                'tabInclude'        : 'jobs/form/email'
+                            ]
+                        ]
+                    %}
+                    {{adminltetags.useTag('tabs',
+                        [
+                            'component'                     : component,
+                            'componentName'                 : componentName,
+                            'componentId'                   : componentId,
+                            'sectionId'                     : 'main',
+                            'tabsId'                        : 'tabs',
+                            'tabsStyle'                     : 'card-outline-tabs',
+                            'tabsData'                      : tabsData
+                        ]
+                    )}}
+                    {% set jobDetails = json_encode(job, 16) %}
+                {% else %}
+                    {% include('jobs/form/lr') %}
+                {% endif %}
+            </fieldset>
+        </form>
+    </div>
+{% if job['id'] is defined %}
+</div>
+{% else %}
+</div>
+{% endif %}
+{% set consignorAddresses = escaper.js(json_encode(consignorAddresses, 16)) %}
+{% set consigneeAddresses = escaper.js(json_encode(consigneeAddresses, 16)) %}
+{% set uoms = escaper.js(json_encode(uoms, 16)) %}
+{% set charges = escaper.js(json_encode(charges, 16)) %}
+{% set jobDetails = escaper.js(json_encode(job, 16)) %}
+<script>
+/*global paginatedPNotify BazProgress BazContentFields BazHelpers BazContentLoader Pace BazCore dataCollection Swal */
+var dataCollectionComponent, dataCollectionSection, dataCollectionSectionForm;
+
+if (!window['dataCollection']['{{componentId}}']) {
+    dataCollectionComponent =
+        window['dataCollection']['{{componentId}}'] = { };
+} else {
+    dataCollectionComponent =
+        window['dataCollection']['{{componentId}}'];
+}
+if (!dataCollectionComponent['{{componentId}}-{{sectionId}}']) {
+    dataCollectionSection =
+        dataCollectionComponent['{{componentId}}-{{sectionId}}'] = { };
+} else {
+    dataCollectionSection =
+        dataCollectionComponent['{{componentId}}-{{sectionId}}'];
+}
+if (!dataCollectionSection['{{componentId}}-{{sectionId}}-form']) {
+    dataCollectionSectionForm =
+        dataCollectionSection['{{componentId}}-{{sectionId}}-form'] = { };
+} else {
+    dataCollectionSectionForm =
+        dataCollectionSection['{{componentId}}-{{sectionId}}-form'];
+}
+
+if (!dataCollectionSectionForm['vars']) {
+    dataCollectionSectionForm['vars'] = { };
+}
+if (!dataCollectionSectionForm['funcs']) {
+    dataCollectionSectionForm['funcs'] = { };
+}
+
+dataCollectionSectionForm['vars']['from_company_address'] = JSON.parse('{{consignorAddresses}}');
+dataCollectionSectionForm['vars']['to_company_address'] = JSON.parse('{{consigneeAddresses}}');
+dataCollectionSectionForm['vars']['uoms'] = JSON.parse('{{uoms}}');
+dataCollectionSectionForm['vars']['charges'] = JSON.parse('{{charges}}');
+dataCollectionSectionForm['vars']['job'] = JSON.parse('{{jobDetails}}');
+dataCollectionSectionForm['vars']['storageResponse'] = { };
+
+dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
+    $('.editCharge').off();
+    $('.editCharge').click(function(e) {
+        e.preventDefault();
+
+        dataCollectionSectionForm['funcs']['addUpdateCharges']();
+
+        var chargeId = $(this).data()['id'];
+
+        $('#{{componentId}}-{{sectionId}}-charge_id').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['id']);
+        $('#{{componentId}}-{{sectionId}}-charges_list').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['charge_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-qty').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['quantity']);
+        $('#{{componentId}}-{{sectionId}}-qty_uom').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['quantity_uom_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-rate').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['rate']);
+        $('#{{componentId}}-{{sectionId}}-rate_uom').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['rate_uom_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-amount').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['amount']);
+        $('#{{componentId}}-{{sectionId}}-visibility').val(dataCollectionSectionForm['vars']['job']['charges'][chargeId]['visibility']).trigger('change');
+
+        $('#{{componentId}}-{{sectionId}}-charges-add').attr('hidden', true);
+        $('#{{componentId}}-{{sectionId}}-charges-update').attr('hidden', false);
+        $('#{{componentId}}-{{sectionId}}-charges-update').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-qty').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-qty_uom').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-rate').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-rate_uom').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-amount').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-visibility').attr('disabled', false);
+    });
+
+    $('.removeCharge').off();
+    $('.removeCharge').click(function(e) {
+        e.preventDefault();
+
+        var thisTr = $(this).parents('tr');
+
+        Swal.fire({
+            html                        : '<span class="text-danger">Remove Charge from Job?<span>',
+            icon                        : 'question',
+            background                  : 'rgba(0,0,0,.8)',
+            backdrop                    : 'rgba(0,0,0,.6)',
+            buttonsStyling              : false,
+            confirmButtonText           : 'Remove',
+            customClass                 : {
+                'confirmButton'             : 'btn btn-danger text-uppercase',
+                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+            },
+            showCancelButton            : true,
+            keydownListenerCapture      : true,
+            allowOutsideClick           : true,
+            allowEscapeKey              : true,
+            didOpen                     : function() {
+                window['dataCollection'].env.sounds.swalSound.play();
+            }
+        }).then((result) => {
+            if (result.value) {
+                var postData = { };
+                postData[$('#security-token').attr('name')] = $('#security-token').val();
+                postData['id'] = $(this).data('id');
+
+                $.post('{{links.url("jobs/removeJobsCharge")}}', postData, function(response) {
+                    if (response.tokenKey && response.token) {
+                        $("#security-token").attr("name", response.tokenKey);
+                        $("#security-token").val(response.token);
+                    }
+
+                    if (response.responseCode === 0) {
+                        dataCollectionSectionForm['vars']['chargesTable'].row(thisTr).remove().draw();
+                        if ($('#{{componentId}}-{{sectionId}}-invoice-table tbody').length > 0) {
+                            $('#{{componentId}}-{{sectionId}}-invoice-table tbody').find('[id="' + postData['id'] + '"]').remove();
+                        }
+                        delete(dataCollectionSectionForm['vars']['job']['charges'][postData['id']]);
+
+                        paginatedPNotify('success', {
+                            text : response.responseMessage
+                        });
+                    } else if (response.responseCode === 1) {
+                        paginatedPNotify('error', {
+                            text : response.responseMessage
+                        });
+                    }
+                }, 'json');
+            }
+        });
+    });
+}
+
+dataCollectionSectionForm['funcs']['resetDownloadButtons'] = function() {
+    $('.removeDocument').off();
+    $('.removeDocument').click(function(e) {
+        e.preventDefault();
+
+        var thisTr = $(this).parents('tr');
+        var color = 'warning';
+        var text = '<span class="text-warning">Remove document from Job?<span>';
+        var signed = false;
+        if (dataCollectionSectionForm['vars']['job']['invoice']['signed_uuid'] === $(thisTr)[0].id) {
+            text = '<span class="text-danger">Document is signed and used by invoice. Remove document from Job?<span>';
+            color = 'danger';
+            signed = true;
+        }
+
+        Swal.fire({
+            html                        : text,
+            icon                        : 'question',
+            background                  : 'rgba(0,0,0,.8)',
+            backdrop                    : 'rgba(0,0,0,.6)',
+            buttonsStyling              : false,
+            confirmButtonText           : 'Remove',
+            customClass                 : {
+                'confirmButton'             : 'btn btn-' + color + ' text-uppercase',
+                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+            },
+            showCancelButton            : true,
+            keydownListenerCapture      : true,
+            allowOutsideClick           : true,
+            allowEscapeKey              : true,
+            didOpen                     : function() {
+                window['dataCollection'].env.sounds.swalSound.play();
+            }
+        }).then((result) => {
+            if (result.value) {
+                if (signed) {
+                    $('#{{componentId}}-{{sectionId}}-signed_uuid').val(0).trigger('change');
+                    $('#{{componentId}}-{{sectionId}}-signed_document').val('');
+                    $('#{{componentId}}-{{sectionId}}-signed_by').val('');
+                    $('#{{componentId}}-{{sectionId}}-signed_at').val('');
+                }
+
+                delete(dataCollectionSectionForm['vars']['job']['documents'][thisTr[0].id]);
+
+                dataCollectionSectionForm['funcs']['updateDocuments'](signed);
+            }
+        });
+    });
+}
+
+dataCollectionSectionForm['funcs']['resetForm'] = function() {
+    $('#{{componentId}}-{{sectionId}}-charge_id').val('');
+    $('#{{componentId}}-{{sectionId}}-charges_list').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-qty').val('');
+    $('#{{componentId}}-{{sectionId}}-qty_uom').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-rate').val('');
+    $('#{{componentId}}-{{sectionId}}-rate_uom').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-amount').val('');
+    $('#{{componentId}}-{{sectionId}}-charges-add').attr('hidden', false);
+    $('#{{componentId}}-{{sectionId}}-charges-add').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-charges-update').attr('hidden', true);
+    $('#{{componentId}}-{{sectionId}}-charges-update').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-qty').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-qty_uom').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-rate').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-rate_uom').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-amount').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-visibility').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-visibility').attr('disabled', true);
+}
+
+dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
+    $('#{{componentId}}-{{sectionId}}-charges-add, #{{componentId}}-{{sectionId}}-charges-update, #{{componentId}}-{{sectionId}}-charges-cancel').off();
+    $('#{{componentId}}-{{sectionId}}-charges-add, #{{componentId}}-{{sectionId}}-charges-update, #{{componentId}}-{{sectionId}}-charges-cancel').click(function(e) {
+        e.preventDefault();
+
+        var thisId = $(this)[0].id;
+
+        if (thisId === '{{componentId}}-{{sectionId}}-charges-cancel') {
+            dataCollectionSectionForm['funcs']['resetForm']();
+        }
+
+        if (thisId === '{{componentId}}-{{sectionId}}-charges-add' ||
+            thisId === '{{componentId}}-{{sectionId}}-charges-update'
+        ) {
+            var thisButton = $(this);
+
+            var url;
+            var postData = { };
+            postData[$('#security-token').attr('name')] = $('#security-token').val();
+
+            if (thisId === '{{componentId}}-{{sectionId}}-charges-add') {
+                url = '{{links.url("jobs/addJobsCharge")}}';
+            }
+            if (thisId === '{{componentId}}-{{sectionId}}-charges-update') {
+                url = '{{links.url("jobs/updateJobsCharge")}}';
+            }
+
+            postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+            postData['quantity'] = $('#{{componentId}}-{{sectionId}}-qty').val();
+            postData['quantity_uom_id'] = $('#{{componentId}}-{{sectionId}}-qty_uom').val();
+            postData['rate'] = $('#{{componentId}}-{{sectionId}}-rate').val();
+            postData['rate_uom_id'] = $('#{{componentId}}-{{sectionId}}-rate_uom').val();
+            postData['amount'] = $('#{{componentId}}-{{sectionId}}-amount').val();
+            postData['visibility'] = $('#{{componentId}}-{{sectionId}}-visibility').val();
+            postData['id'] = $('#{{componentId}}-{{sectionId}}-charge_id').val();
+            postData['charge_id'] = $('#{{componentId}}-{{sectionId}}-charges_list').val();
+
+            if (postData['charge_id'] == 0) {
+                paginatedPNotify('error', {text : 'Please select charge!'});
+                return;
+            }
+            if (postData['visibility'] == 0) {
+                paginatedPNotify('error', {text : 'Please select visibility!'});
+                return;
+            }
+            if (postData['amount'] === '' || postData['amount'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct amount!'});
+                return;
+            }
+
+            $(this).attr('disabled', true);
+            $(this).children('i').attr('hidden', false);
+
+            $.post(url, postData, function(response) {
+                if (response.tokenKey && response.token) {
+                    $("#security-token").attr("name", response.tokenKey);
+                    $("#security-token").val(response.token);
+                }
+
+                if (response.responseCode === 0) {
+                    var charge = { };
+                    var newCharge = false;
+                    var chargeRow = { };
+                    // Remove Invoice TR, not needed after we create print!
+                    var invoiceTr = '';
+
+                    if (response.responseData.newCharge) {
+                        newCharge = true;
+                        charge = response.responseData.newCharge;
+                    } else if (response.responseData.updatedCharge) {
+                        charge = response.responseData.updatedCharge;
+                    }
+
+                    chargeRow['charge_id'] = dataCollectionSectionForm['vars']['charges'][charge['charge_id']]['name'];
+                    invoiceTr += '<td>' + chargeRow['charge_id'] + '</td>';
+
+                    var visibilityType;
+                    if (charge['visibility'] == 1) {
+                        visibilityType = 'LR Only';
+                    } else if (charge['visibility'] == 2) {
+                        visibilityType = 'Invoice Only';
+                    } else if (charge['visibility'] == 3) {
+                        visibilityType = 'Both LR & Invoice';
+                    }
+                    chargeRow['visibility'] = visibilityType;
+                    invoiceTr += '<td>' + visibilityType + '</td>';
+
+                    if (charge['quantity'] && charge['quantity'] != '0') {
+                        chargeRow['qty'] = charge['quantity'];
+                    } else {
+                        chargeRow['qty'] = '-';
+                    }
+                    invoiceTr += '<td>' + chargeRow['qty'] + '</td>';
+
+                    if (charge['quantity_uom_id'] && charge['quantity_uom_id'] != '0') {
+                        chargeRow['qty_uom_id'] = dataCollectionSectionForm['vars']['uoms'][charge['quantity_uom_id']]['name'];
+                    } else {
+                        chargeRow['qty_uom_id'] = '-';
+                    }
+                    invoiceTr += '<td>' + chargeRow['qty_uom_id'] + '</td>';
+
+                    if (charge['rate'] && charge['rate'] != '0') {
+                        chargeRow['rate'] = charge['rate'];
+                    } else {
+                        chargeRow['rate'] = '-';
+                    }
+                    invoiceTr += '<td>' + chargeRow['rate'] + '</td>';
+
+                    if (charge['rate_uom_id'] && charge['rate_uom_id'] != '0') {
+                        chargeRow['rate_uom_id'] = dataCollectionSectionForm['vars']['uoms'][charge['rate_uom_id']]['name'];
+                    } else {
+                        chargeRow['rate_uom_id'] = '-';
+                    }
+                    invoiceTr += '<td>' + chargeRow['rate_uom_id'] + '</td>';
+
+                    chargeRow['amount'] = charge['amount'];
+                    invoiceTr += '<td>' + chargeRow['amount'] + '</td>';
+
+                    chargeRow['actions'] =
+                        '<button class="btn btn-xs btn-warning mr-1 editCharge text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-edit-' + charge['id'] +
+                        '" data-id="' + charge['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-edit"></i></button>' +
+                        '<button class="btn btn-xs btn-danger mr-1 removeCharge text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-remove-' + charge['id'] +
+                        '" data-id="' + charge['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-trash"></i> </button>';
+                    chargeRow['DT_RowId'] = charge['id'];
+
+                    if (newCharge) {
+                        dataCollectionSectionForm['vars']['chargesTable'].row.add(chargeRow).draw();
+                        if ($('#{{componentId}}-{{sectionId}}-invoice-table tbody').length > 0) {
+                            $('#{{componentId}}-{{sectionId}}-invoice-table tbody').append('<tr id=' + charge['id'] + '>' + invoiceTr + '</tr>');
+                        }
+                    } else {
+                        for (var row in dataCollectionSectionForm['vars']['chargesTable'].rows().data()) {
+                            if (dataCollectionSectionForm['vars']['chargesTable'].rows().data()[row]['DT_RowId'] == charge['id']) {
+                                dataCollectionSectionForm['vars']['chargesTable'].row(row).data(chargeRow).draw();
+
+                                if ($('#{{componentId}}-{{sectionId}}-invoice-table tbody').length > 0) {
+                                    $('#{{componentId}}-{{sectionId}}-invoice-table tbody').find('[id="' + charge['id'] + '"]').empty().append(invoiceTr);
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    dataCollectionSectionForm['funcs']['resetChargesButtons']();
+                    dataCollectionSectionForm['funcs']['resetForm']();
+                    dataCollectionSectionForm['vars']['job']['charges'][charge['id']] = charge;
+
+
+                    paginatedPNotify('success', {
+                        text : response.responseMessage
+                    });
+                } else if (response.responseCode === 1) {
+                    paginatedPNotify('error', {
+                        text : response.responseMessage
+                    });
+                }
+                thisButton.attr('disabled', false);
+                thisButton.children('i').attr('hidden', true);
+            }, 'json');
+        }
+    });
+}
+
+dataCollectionSectionForm['funcs']['updateDocuments'] = function(removesigned = false) {
+    var postData = { };
+    postData[$('#security-token').attr('name')] = $('#security-token').val();
+    postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+    postData['documents'] = dataCollectionSectionForm['vars']['job']['documents'];
+    if (removesigned) {
+        postData['removesigned'] = true;
+    }
+
+    $.post('{{links.url("jobs/updateDocument")}}', postData, function(response) {
+        if (response.responseCode == 0) {
+            paginatedPNotify('success', response.responseMessage);
+
+            if (response.responseData.documents) {
+                dataCollectionSectionForm['vars']['job']['documents'] = response.responseData.documents;
+
+                dataCollectionSectionForm['vars']['documentsTable'].rows().remove().draw();
+
+                var invoiceDocument = $('#{{componentId}}-{{sectionId}}-signed_uuid').val();
+
+                $('#{{componentId}}-{{sectionId}}-signed_uuid').empty().trigger('change');
+                $('#{{componentId}}-{{sectionId}}-email_attachments').empty().trigger('change');
+
+                if (Object.keys(dataCollectionSectionForm['vars']['job']['documents']).length > 0) {
+                    for (var row in dataCollectionSectionForm['vars']['job']['documents']) {
+                        var docRow = { };
+
+                        docRow['org_file_name'] = dataCollectionSectionForm['vars']['job']['documents'][row]['org_file_name'];
+                        docRow['account_name'] = dataCollectionSectionForm['vars']['job']['documents'][row]['account_name'];
+                        docRow['date'] = dataCollectionSectionForm['vars']['job']['documents'][row]['date'];
+
+                        docRow['actions'] =
+                            '<a target="_blank" class="btn btn-xs btn-primary mr-1 downloadDocument text-white" href="#"' +
+                            'id="{{componentId}}-{{sectionId}}-download-' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'] +
+                            '" data-id="' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'] +
+                            '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                            ' data-original-title=""><i class="fas fa-fw fa-download"></i> </a>' +
+                            '<button class="btn btn-xs btn-danger mr-1 removeDocument text-white" ' +
+                            'id="{{componentId}}-{{sectionId}}-remove-' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'] +
+                            '" data-id="' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'] +
+                            '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                            ' data-original-title=""><i class="fas fa-fw fa-trash"></i> </button>';
+                        docRow['DT_RowId'] = dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'];
+
+                        dataCollectionSectionForm['vars']['documentsTable'].row.add(docRow).draw();
+
+                        var newSignedOption = new Option(
+                            dataCollectionSectionForm['vars']['job']['documents'][row]['org_file_name'],
+                            dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'],
+                            false,
+                            false
+                        );
+                        var newEmailOption = new Option(
+                            dataCollectionSectionForm['vars']['job']['documents'][row]['org_file_name'],
+                            dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'],
+                            false,
+                            false
+                        );
+
+                        var url = '{{links.url("system/storages/q/uuid/' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid'] + '")}}';
+                        $('#{{componentId}}-{{sectionId}}-download-' + dataCollectionSectionForm['vars']['job']['documents'][row]['uuid']).attr('href', url);
+                        $('#{{componentId}}-{{sectionId}}-signed_uuid').append(newSignedOption).trigger('change');
+                        $('#{{componentId}}-{{sectionId}}-email_attachments').append(newEmailOption).trigger('change');
+                    }
+
+                    if (invoiceDocument !== '') {
+                        $('#{{componentId}}-{{sectionId}}-signed_uuid').val(invoiceDocument).trigger('change');
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-signed_uuid').val(0).trigger('change');
+                    }
+                    $('#{{componentId}}-{{sectionId}}-email_attachments').val(0).trigger('change');
+
+                    dataCollectionSectionForm['funcs']['resetDownloadButtons']();
+                }
+            }
+        } else {
+            paginatedPNotify('error', response.responseMessage);
+        }
+
+        if (response.tokenKey && response.token) {
+            $("#security-token").attr("name", response.tokenKey);
+            $("#security-token").val(response.token);
+        }
+    }, 'json');
+}
+
+dataCollectionSectionForm['funcs']['getCompany'] = function(companyId, destinations = []) {
+    $(destinations).each(function(id, destination) {
+        $('#' + destination + '_company_details_noinfo').attr('hidden', false);
+        $('#' + destination + '_company_details_info').attr('hidden', true);
+
+        var postData = { };
+        postData[$('#security-token').attr('name')] = $('#security-token').val();
+        postData['company_id'] = companyId;
+
+        $.post('{{links.url("companies/getCompany")}}', postData, function(response) {
+            if (response.tokenKey && response.token) {
+                $("#security-token").attr("name", response.tokenKey);
+                $("#security-token").val(response.token);
+            }
+
+            if (response.responseCode == 0) {
+                dataCollectionSectionForm['vars'][destination + '_company_address'] = { };
+                $('#{{componentId}}-{{sectionId}}-' + destination + '_company_address_id').empty().trigger('change');
+
+                if (response.responseData && response.responseData.company && response.responseData.company.addresses) {
+                    for (var address in response.responseData.company.addresses) {
+                        var newOption = new Option(
+                            response.responseData.company.addresses[address]['address_reference'],
+                            response.responseData.company.addresses[address]['id'],
+                            false,
+                            false
+                        );
+
+                        $('#{{componentId}}-{{sectionId}}-' + destination + '_company_address_id').append(newOption).trigger('change');
+                        dataCollectionSectionForm['vars'][destination + '_company_address'][response.responseData.company.addresses[address]['id']]
+                            = response.responseData.company.addresses[address]
+                    }
+
+                    $('#{{componentId}}-{{sectionId}}-' + destination + '_company_address_id').val(0).trigger('change');
+                }
+            }
+        }, 'json');
+    })
+}
+
+dataCollectionSection =
+    $.extend(dataCollectionSection, {
+        '{{componentId}}-{{sectionId}}-id'                          : { },
+        '{{componentId}}-{{sectionId}}-lr'                          : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-check-lr').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-lr').val();
+
+                    if (postData['lr_no'] === '') {
+                        paginatedPNotify('error', 'Please enter Lorry Receipt #');
+
+                        return false;
+                    }
+
+                    $.post('{{links.url("jobs/checkLr")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+
+                $('#{{componentId}}-{{sectionId}}-edit-lr').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+
+                    $.post('{{links.url("jobs/getNextLr")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+
+                            if (response.responseData.newLr.lr_no) {
+                                $('#{{componentId}}-{{sectionId}}-lr').val(response.responseData.newLr.lr_no);
+                            }
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-financial_year'              : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-edit-financial_year').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+
+                    $.post('{{links.url("jobs/getFy")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+
+                            if (response.responseData.newLr.financial_year) {
+                                $('#{{componentId}}-{{sectionId}}-financial_year').val(response.responseData.newLr.financial_year);
+                            }
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-date'                        : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000",
+            maxDate             : "today",
+        },
+        '{{componentId}}-{{sectionId}}-status'                      : {
+            placeholder : 'SELECT STATUS'
+        },
+        '{{componentId}}-{{sectionId}}-vehicle_id'                  : {
+            placeholder : 'SELECT VEHICLE'
+        },
+        '{{componentId}}-{{sectionId}}-organisation_id'             : {
+            placeholder : 'SELECT ORGANISATION'
+        },
+        '{{componentId}}-{{sectionId}}-company_id'                  : {
+            placeholder : 'SELECT CUSTOMER',
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-company_id').on('select2:select', function(e) {
+                    $('#{{componentId}}-{{sectionId}}-from_company_id').val(e.params.data.id).trigger('change');
+                    $('#{{componentId}}-{{sectionId}}-to_company_id').val(e.params.data.id).trigger('change');
+                    dataCollectionSectionForm['funcs']['getCompany'](e.params.data.id, ['from','to']);
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-from_company_id'             : {
+            placeholder : 'SELECT CONSIGNOR',
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-from_company_id').on('select2:select', function(e) {
+                    dataCollectionSectionForm['funcs']['getCompany'](e.params.data.id, ['from']);
+                });
+
+                $('#{{componentId}}-{{sectionId}}-from_company_address_id').on('select2:select', function(e) {
+                    var fromAddress =
+                        dataCollectionSectionForm['vars']['from_company_address'][$('#{{componentId}}-{{sectionId}}-from_company_address_id').val()];
+
+                    $('#from_address_reference').html(fromAddress['address_reference']);
+                    if (fromAddress['attention_to'] && fromAddress['attention_to'] !== '') {
+                        $('#from_attention_to').html(fromAddress['attention_to']);
+                    } else {
+                        $('#from_attention_to').html('-');
+                    }
+                    if (fromAddress['street_address'] && fromAddress['street_address'] !== '') {
+                        $('#from_street_address').html(fromAddress['street_address']);
+                    } else {
+                        $('#from_street_address').html('-');
+                    }
+                    if (fromAddress['street_address_2'] && fromAddress['street_address_2'] !== '') {
+                        $('#from_street_address_2').html(fromAddress['street_address_2']);
+                    } else {
+                        $('#from_street_address_2').html('-');
+                    }
+                    if (fromAddress['street_address_3'] && fromAddress['street_address_3'] !== '') {
+                        $('#from_street_address_3').html(fromAddress['street_address_3']);
+                        $('#from_street_address_3_div').attr('hidden', false);
+                    } else {
+                        $('#from_street_address_3').html('-');
+                        $('#from_street_address_3_div').attr('hidden', true);
+                    }
+                    if (fromAddress['street_address_4'] && fromAddress['street_address_4'] !== '') {
+                        $('#from_street_address_4').html(fromAddress['street_address_4']);
+                        $('#from_street_address_4_div').attr('hidden', false);
+                    } else {
+                        $('#from_street_address_4').html('-');
+                        $('#from_street_address_4_div').attr('hidden', true);
+                    }
+                    if (fromAddress['city_name'] && fromAddress['city_name'] !== '') {
+                        $('#from_city').html(fromAddress['city_name']);
+                    } else {
+                        $('#from_city').html('-');
+                    }
+                    if (fromAddress['state_name'] && fromAddress['state_name'] !== '') {
+                        $('#from_state').html(fromAddress['state_name']);
+                    } else {
+                        $('#from_state').html('-');
+                    }
+
+                    $('#from_company_details_noinfo').attr('hidden', true);
+                    $('#from_company_details_info').attr('hidden', false);
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-from_company_address_id'     : {
+            placeholder : 'SELECT CONSIGNOR ADDRESS'
+        },
+        '{{componentId}}-{{sectionId}}-to_company_id'               : {
+            placeholder : 'SELECT CONSIGNEE',
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-to_company_id').on('select2:select', function(e) {
+                    dataCollectionSectionForm['funcs']['getCompany'](e.params.data.id, ['to']);
+                });
+
+                $('#{{componentId}}-{{sectionId}}-to_company_address_id').on('select2:select', function(e) {
+                    var toAddress =
+                        dataCollectionSectionForm['vars']['to_company_address'][$('#{{componentId}}-{{sectionId}}-to_company_address_id').val()];
+
+                    $('#to_address_reference').html(toAddress['address_reference']);
+                    if (toAddress['attention_to'] && toAddress['attention_to'] !== '') {
+                        $('#to_attention_to').html(toAddress['attention_to']);
+                    } else {
+                        $('#to_attention_to').html('-');
+                    }
+                    if (toAddress['street_address'] && toAddress['street_address'] !== '') {
+                        $('#to_street_address').html(toAddress['street_address']);
+                    } else {
+                        $('#to_street_address').html('-');
+                    }
+                    if (toAddress['street_address_2'] && toAddress['street_address_2'] !== '') {
+                        $('#to_street_address_2').html(toAddress['street_address_2']);
+                    } else {
+                        $('#to_street_address_2').html('-');
+                    }
+                    if (toAddress['street_address_3'] && toAddress['street_address_3'] !== '') {
+                        $('#to_street_address_3').html(toAddress['street_address_3']);
+                        $('#to_street_address_3_div').attr('hidden', false);
+                    } else {
+                        $('#to_street_address_3').html('-');
+                        $('#to_street_address_3_div').attr('hidden', true);
+                    }
+                    if (toAddress['street_address_4'] && toAddress['street_address_4'] !== '') {
+                        $('#to_street_address_4').html(toAddress['street_address_4']);
+                        $('#to_street_address_4_div').attr('hidden', false);
+                    } else {
+                        $('#to_street_address_4').html('-');
+                        $('#to_street_address_4_div').attr('hidden', true);
+                    }
+                    if (toAddress['city_name'] && toAddress['city_name'] !== '') {
+                        $('#to_city').html(toAddress['city_name']);
+                    } else {
+                        $('#to_city').html('-');
+                    }
+                    if (toAddress['state_name'] && toAddress['state_name'] !== '') {
+                        $('#to_state').html(toAddress['state_name']);
+                    } else {
+                        $('#to_state').html('-');
+                    }
+
+                    $('#to_company_details_noinfo').attr('hidden', true);
+                    $('#to_company_details_info').attr('hidden', false);
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-to_company_address_id'       : {
+            placeholder : 'SELECT CONSIGNEE ADDRESS'
+        },
+        '{{componentId}}-{{sectionId}}-lr_notes'                    : { },
+        '{{componentId}}-{{sectionId}}-lr_dev_notes'                : { },
+        '{{componentId}}-{{sectionId}}-charge_id'                   : { },
+        '{{componentId}}-{{sectionId}}-charges_list'                : {
+            placeholder : "SELECT CHARGE"
+        },
+        '{{componentId}}-{{sectionId}}-visibility'                  : {
+            placeholder : "SELECT CHARGE VISIBILITY"
+        },
+        '{{componentId}}-{{sectionId}}-qty'                         : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-qty').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-qty').val() !== '') {
+                        var rate = $('#{{componentId}}-{{sectionId}}-rate').val();
+                        if (rate === '') {
+                            rate = 1;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-amount')
+                            .val(($('#{{componentId}}-{{sectionId}}-qty').val() * rate).toFixed(2));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-qty_uom'                     : {
+            placeholder : "SELECT QTY UOM",
+            allowClear : true
+        },
+        '{{componentId}}-{{sectionId}}-rate'                        : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-rate').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-rate').val() !== '') {
+                        var qty = $('#{{componentId}}-{{sectionId}}-qty').val();
+                        if (qty === '') {
+                            qty = 1;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-amount')
+                            .val(($('#{{componentId}}-{{sectionId}}-rate').val() * qty).toFixed(2));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-rate_uom'                    : {
+            placeholder : "SELECT RATE UOM",
+            allowClear : true
+        },
+        '{{componentId}}-{{sectionId}}-amount'                      : { },
+        '{{componentId}}-{{sectionId}}-charges'                     : {
+            afterInit: function() {
+                if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-charges-table')) {
+                    var columns =
+                        [
+                            {data: 'charge_id', orderable: false},
+                            {data: 'visibility', orderable: false},
+                            {data: 'qty', orderable: false},
+                            {data: 'qty_uom_id', orderable: false},
+                            {data: 'rate', orderable: false},
+                            {data: 'rate_uom_id', orderable: false},
+                            {data: 'amount', orderable: false}
+                        ];
+
+                    if (dataCollectionSectionForm['vars']['job']['status'] != '1') {
+                        columns.push({data: 'actions', orderable: false});
+                    }
+
+                    dataCollectionSectionForm['vars']['chargesTable'] = $('#{{componentId}}-{{sectionId}}-charges-table').DataTable({
+                        columns: columns,
+                        order: false
+                    });
+                }
+
+                dataCollectionSectionForm['funcs']['resetChargesButtons']();
+
+                $('#{{componentId}}-{{sectionId}}-charges_list').on('select2:select', function() {
+                    $('#{{componentId}}-{{sectionId}}-qty').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-qty_uom').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-rate').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-rate_uom').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-amount').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-visibility').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-charges-add').attr('disabled', false);
+                });
+
+                dataCollectionSectionForm['funcs']['addUpdateCharges']();
+            }
+        },
+        '{{componentId}}-{{sectionId}}-invoice_no'                  : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-check-invoice').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
+                    postData['invoice_no'] = $('#{{componentId}}-{{sectionId}}-invoice_no').val();
+
+                    if (postData['invoice_no'] === '') {
+                        paginatedPNotify('error', 'Please enter invoice #');
+
+                        return false;
+                    }
+                    if (postData['financial_year'] === '') {
+                        paginatedPNotify('error', 'Please enter financial year in Lorry Receipt!');
+
+                        return false;
+                    }
+
+                    $.post('{{links.url("jobs/checkInvoice")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+
+                $('#{{componentId}}-{{sectionId}}-edit-invoice').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
+
+                    $.post('{{links.url("jobs/getNextInvoiceNumber")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+
+                            if (response.responseData.nextInvoiceNumber) {
+                                $('#{{componentId}}-{{sectionId}}-invoice_no').val(response.responseData.nextInvoiceNumber);
+                            }
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-invoice_date'                : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000",
+            maxDate             : "today",
+        },
+        '{{componentId}}-{{sectionId}}-due_date'                    : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000",
+            maxDate             : "today",
+        },
+        '{{componentId}}-{{sectionId}}-po_number'                   : { },
+        '{{componentId}}-{{sectionId}}-material_invoice_no'         : { },
+        '{{componentId}}-{{sectionId}}-signed_uuid'                : {
+            placeholder: 'JOB DOCUMENTS',
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-extract-signature').off();
+                $('#{{componentId}}-{{sectionId}}-extract-signature').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['uuid'] = $('#{{componentId}}-{{sectionId}}-signed_uuid').val();
+
+                    $.post('{{links.url("jobs/extractDigitalSignature")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            if (response.responseData.fileName && response.responseData.signedBy && response.responseData.signedAt) {
+                                $('#{{componentId}}-{{sectionId}}-signed_document').val(response.responseData.fileName);
+                                $('#{{componentId}}-{{sectionId}}-signed_by').val(response.responseData.signedBy);
+                                $('#{{componentId}}-{{sectionId}}-signed_at').val(response.responseData.signedAt);
+
+                                paginatedPNotify('success', response.responseMessage);
+                            }
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+
+                $('#{{componentId}}-{{sectionId}}-signed_uuid').on('select2:select', function(e) {
+                    $('#{{componentId}}-{{sectionId}}-extract-signature').attr('disabled', false);
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-signed_document'             : { },
+        '{{componentId}}-{{sectionId}}-signed_by'                   : { },
+        '{{componentId}}-{{sectionId}}-signed_at'                   : { },
+        '{{componentId}}-{{sectionId}}-invoice_notes'               : { },
+        '{{componentId}}-{{sectionId}}-show_lr_notes'               : { },
+        '{{componentId}}-{{sectionId}}-show_invoice_notes'          : { },
+        '{{componentId}}-{{sectionId}}-show_organisation_pterms'    : { },
+        '{{componentId}}-{{sectionId}}-show_customer_pterms'        : { },
+        '{{componentId}}-{{sectionId}}-preview_documents'           : { },
+        '{{componentId}}-{{sectionId}}-documents'                   : {
+            placeholder: 'JOB DOCUMENTS',
+            afterInit: function() {
+                if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-documents-table')) {
+                    var columns =
+                        [
+                            {data: 'org_file_name', orderable: true},
+                            {data: 'account_name', orderable: true},
+                            {data: 'date', orderable: true},
+                            {data: 'actions', orderable: false}
+                        ];
+
+                    dataCollectionSectionForm['vars']['documentsTable'] = $('#{{componentId}}-{{sectionId}}-documents-table').DataTable({
+                        columns: columns
+                    });
+                }
+
+                dataCollectionSectionForm['funcs']['resetDownloadButtons']();
+            }
+        },
+        '{{componentId}}-{{sectionId}}-print'                       : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-print-lr, #{{componentId}}-{{sectionId}}-print-invoice').off();
+                $('#{{componentId}}-{{sectionId}}-print-lr, #{{componentId}}-{{sectionId}}-print-invoice').click(function(e){
+                    e.preventDefault();
+
+                    var buttonId = $(this)[0].id;
+                    var lrNo = $('#{{componentId}}-{{sectionId}}-id').val();
+                    var print;
+
+                    if (buttonId === '{{componentId}}-{{sectionId}}-print-lr') {
+                        if (lrNo === '') {
+                            paginatedPNotify('error', 'Please enter lorry receipt #');
+
+                            return false;
+                        }
+
+                        print = 'lr';
+
+                        if ($('#{{componentId}}-{{sectionId}}-show_lr_notes')[0].checked === true) {
+                            print += '/lrnotes/true';
+                        }
+
+                    } else if (buttonId === '{{componentId}}-{{sectionId}}-print-invoice') {
+                        if (lrNo === '') {
+                            paginatedPNotify('error', 'Please enter lorry receipt #');
+
+                            return false;
+                        }
+
+                        if ($('#{{componentId}}-{{sectionId}}-invoice_no').val() === '') {
+                            paginatedPNotify('error', 'Please enter invoice #');
+
+                            return false;
+                        }
+                        if ($('#{{componentId}}-{{sectionId}}-financial_year').val() === '') {
+                            paginatedPNotify('error', 'Please enter financial year in Lorry Receipt!');
+
+                            return false;
+                        }
+
+                        print = 'invoice';
+
+                        if ($('#{{componentId}}-{{sectionId}}-show_invoice_notes')[0].checked === true) {
+                            print += '/inotes/true';
+                        }
+                    }
+
+                    if ($('#{{componentId}}-{{sectionId}}-show_organisation_pterms')[0].checked === true) {
+                        print += '/opterms/true';
+                    }
+                    if ($('#{{componentId}}-{{sectionId}}-show_customer_pterms')[0].checked === true) {
+                        print += '/cpterms/true';
+                    }
+
+                    window.open('{{links.url("jobs/q/id/' + lrNo + '/print/' + print + '")}}', '_blank');
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-email_to'                    : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-import_to').off();
+                $('#{{componentId}}-{{sectionId}}-import_to').click(function(e) {
+                    e.preventDefault();
+
+                    if (dataCollectionSectionForm['vars']['job']['company']['company_email'] && dataCollectionSectionForm['vars']['job']['company']['company_email'] !== '') {
+                        $('#{{componentId}}-{{sectionId}}-email_to').val(dataCollectionSectionForm['vars']['job']['company']['company_email']);
+                    } else {
+                        paginatedPNotify('error', {text : 'No email address for ' + dataCollectionSectionForm['vars']['job']['company']['name']});
+                    }
+                });
+
+                $('#{{componentId}}-{{sectionId}}-import_subject').off();
+                $('#{{componentId}}-{{sectionId}}-import_subject').click(function(e) {
+                    e.preventDefault();
+
+                    $('#{{componentId}}-{{sectionId}}-email_subject').val('INVOICE# {{formattedInvoice}} | LR# ' + $('#{{componentId}}-{{sectionId}}-id').val());
+                });
+
+                $('#{{componentId}}-{{sectionId}}-send-email').off();
+                $('#{{componentId}}-{{sectionId}}-send-email').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+                    postData['to'] = $('#{{componentId}}-{{sectionId}}-email_to').val();
+                    postData['cc'] = $('#{{componentId}}-{{sectionId}}-email_cc').val();
+                    postData['bcc'] = $('#{{componentId}}-{{sectionId}}-email_bcc').val();
+                    postData['subject'] = $('#{{componentId}}-{{sectionId}}-email_subject').val();
+                    postData['message'] = $('#{{componentId}}-{{sectionId}}-email_message').val();
+                    postData['attachments'] = $('#{{componentId}}-{{sectionId}}-email_attachments').val();
+
+                    $.post('{{links.url("jobs/email")}}', postData, function(response) {
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+
+                        if (response.responseCode === 0) {
+                            $('#{{componentId}}-{{sectionId}}-id').val('');
+                            $('#{{componentId}}-{{sectionId}}-email_to').val('');
+                            $('#{{componentId}}-{{sectionId}}-email_cc').val('');
+                            $('#{{componentId}}-{{sectionId}}-email_bcc').val('');
+                            $('#{{componentId}}-{{sectionId}}-email_subject').val('');
+                            $('#{{componentId}}-{{sectionId}}-email_message').trumbowyg('empty');
+                            $('#{{componentId}}-{{sectionId}}-email_attachments').val(0).trigger('change');
+                            paginatedPNotify('success', {
+                                text : response.responseMessage
+                            });
+                        } else if (response.responseCode === 1) {
+                            paginatedPNotify('error', {
+                                text : response.responseMessage
+                            });
+                        }
+                    }, 'json');
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-email_cc'                    : { },
+        '{{componentId}}-{{sectionId}}-email_bcc'                   : { },
+        '{{componentId}}-{{sectionId}}-email_subject'               : { },
+        '{{componentId}}-{{sectionId}}-email_message'               : { },
+        '{{componentId}}-{{sectionId}}-email_attachments'           : {
+            placeholder : "SELECT FILES TO ATTACH"
+        },
+        '{{componentId}}-{{sectionId}}-form'                        : {
+            rules: {
+                '{{componentId}}-{{sectionId}}-id'                      : 'required',
+                '{{componentId}}-{{sectionId}}-financial_year'          : 'required',
+                '{{componentId}}-{{sectionId}}-date'                    : 'required',
+                '{{componentId}}-{{sectionId}}-vehicle_id'              : 'required',
+                '{{componentId}}-{{sectionId}}-organisation_id'         : 'required',
+                '{{componentId}}-{{sectionId}}-company_id'              : 'required',
+                '{{componentId}}-{{sectionId}}-from_company_id'         : 'required',
+                '{{componentId}}-{{sectionId}}-from_company_address_id' : 'required',
+                '{{componentId}}-{{sectionId}}-to_company_id'           : 'required',
+                '{{componentId}}-{{sectionId}}-to_company_address_id'   : 'required',
+            },
+            messages: {
+                '{{componentId}}-{{sectionId}}-id'                      : 'Please enter lorry receipt #',
+                '{{componentId}}-{{sectionId}}-financial_year'          : 'Please enter financial year',
+                '{{componentId}}-{{sectionId}}-date'                    : 'Please select date',
+                '{{componentId}}-{{sectionId}}-vehicle_id'              : 'Please select vehicle',
+                '{{componentId}}-{{sectionId}}-organisation_id'         : 'Please select organisation',
+                '{{componentId}}-{{sectionId}}-company_id'              : 'Please select customer',
+                '{{componentId}}-{{sectionId}}-from_company_id'         : 'Please select consigner',
+                '{{componentId}}-{{sectionId}}-from_company_address_id' : 'Please select consigner address',
+                '{{componentId}}-{{sectionId}}-to_company_id'           : 'Please select consignee',
+                '{{componentId}}-{{sectionId}}-to_company_address_id'   : 'Please select consignee address',
+            },
+            onSubmit: function() {
+                return true;
+            }
+        }
+    });
+
+$('#body').off('dropzoneInitDone');
+$('#body').on('dropzoneInitDone', function() {
+    if (window['dataCollection']['{{componentId}}']['{{componentId}}-{{sectionId}}']['{{componentId}}-{{sectionId}}-upload_documents']) {
+        window['dataCollection']['{{componentId}}']['{{componentId}}-{{sectionId}}']['{{componentId}}-{{sectionId}}-upload_documents']['onSuccess'] = function(file, response) {
+            if (!dataCollectionSectionForm['vars']['job']['documents']) {
+                dataCollectionSectionForm['vars']['job']['documents'] = { };
+            }
+            if (response.responseData && response.responseData.uuid) {
+                dataCollectionSectionForm['vars']['job']['documents'][response.responseData.uuid] = { }
+                dataCollectionSectionForm['vars']['job']['documents'][response.responseData.uuid]['uuid'] = response.responseData['uuid'];
+                dataCollectionSectionForm['vars']['job']['documents'][response.responseData.uuid]['org_file_name'] = response.responseData['org_file_name'];
+            }
+        };
+        window['dataCollection']['{{componentId}}']['{{componentId}}-{{sectionId}}']['{{componentId}}-{{sectionId}}-upload_documents']['onQueueComplete'] = function() {
+            dataCollectionSectionForm['funcs']['updateDocuments']();
+        };
+    }
+});
+</script>

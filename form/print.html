@@ -1,0 +1,44 @@
+{% if print is defined %}
+    {% set componentId = 'jobs' %}
+    {% set sectionId = 'print' %}
+    {% set pageSize = 'A4' %}
+    {% if organisationSettings[print ~ '_page_size'] is defined %}
+        {% set pageSize = ucfirst(organisationSettings[print ~ '_page_size']) %}
+    {% endif %}
+    <div class="print" data-print="{{ print }}">
+        {% if print == 'lr' %}
+            {% set lrCopies = [] %}
+            {% set lrColors = [] %}
+            {% if organisationSettings['lr_print_copies'] is defined %}
+                {% if organisationSettings['lr_print_copies'] != '' and str_contains(organisationSettings['lr_print_copies'], ',') %}
+                    {% set lrCopiesArr = explode(',', organisationSettings['lr_print_copies']) %}
+                    {% if lrCopiesArr|length > 0 %}
+                        {% for lrCopyKey, lrCopy in lrCopiesArr %}
+                            {% if str_contains(organisationSettings['lr_print_copies'], ':') %}
+                                {% set lrCopyArr = explode(':', lrCopy) %}
+                                {% if lrCopyArr|length == 2 %}
+                                    {% set lrCopies[lrCopyKey] = lrCopyArr[0] %}
+                                    {% set lrColors[lrCopyKey] = lrCopyArr[1] %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if lrCopies|length == 0 %}
+                {% set lrCopies = ['LR COPY'] %}
+                {% set lrColors = ['black'] %}
+            {% endif %}
+            {% for lrCopyKey, lrCopy in lrCopies %}
+                {% set color = lrColors[lrCopyKey] %}
+                <p class="text-uppercase text-{{ color }}" style="display: inline;  position: relative !important;  opacity: 0.50; font-size: 3em; width: 100%; text-align: center; z-index: 1000; left: 15px; writing-mode: horizontal-tb;">{{ lrCopy }} COPY</p>
+                {% include('jobs/form/print/lr') %}
+                {% if lrCopyKey != 3 %}
+                    <div style="break-before: page;"></div>
+                {% endif %}
+            {% endfor %}
+        {% elseif print == 'invoice' %}
+            {% include('jobs/form/print/invoice') %}
+        {% endif %}
+    </div>
+{% endif %}

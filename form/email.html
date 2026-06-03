@@ -1,0 +1,209 @@
+{% set organisationSettings = [] %}
+{% if organisation_settings[job['organisation']['id']] is defined %}
+    {% set organisationSettings = organisation_settings[job['organisation']['id']] %}
+{% endif %}
+{% set toEmails = '' %}
+{% if job['company']['company_email'] is defined and job['company']['company_email'] != '' %}
+    {% set toEmails = job['company']['company_email'] %}
+{% endif %}
+{% set bccEmails = '' %}
+{% if organisationSettings['invoice_bcc_emails'] is defined and organisationSettings['invoice_bcc_emails'] != '' %}
+    {% set bccEmails = organisationSettings['invoice_bcc_emails'] %}
+{% endif %}
+{% set subject = '' %}
+{% if formattedInvoice is not defined %}
+    {% if job['invoice']['invoice_no'] is defined %}
+        {% set formattedInvoice = job['invoice']['invoice_no'] %}
+    {% endif %}
+{% endif %}
+{% set subject = 'INVOICE# ' ~ formattedInvoice ~ ' | LR# ' ~ job['id'] %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'email_to',
+                'fieldLabel'                            : 'To',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 100,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'To',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'import_to'         : [
+                            'title'                         : false,
+                            'icon'                          : 'sync',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : toEmails
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'email_cc',
+                'fieldLabel'                            : 'CC',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 100,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'CC',
+                'fieldInputToggleEdit'                  : true,
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : ''
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'email_bcc',
+                'fieldLabel'                            : 'BCC',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 100,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'BCC',
+                'fieldInputToggleEdit'                  : true,
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : bccEmails
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'email_subject',
+                'fieldLabel'                            : 'Subject',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 100,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Subject',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'import_subject'         : [
+                            'title'                         : false,
+                            'icon'                          : 'sync',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white'
+                        ]
+                    ],
+                'fieldDisabled'                         : true,
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : subject
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'email_message',
+                'fieldLabel'                     : 'Message',
+                'fieldType'                      : 'trumbowyg',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Add your email message',
+                'fieldRequired'                  : false,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : false,
+                'fieldBazPostOnUpdate'           : false,
+                'fieldDataInputMaxLength'        : 2048,
+                'fieldTextareaRows'              : 10,
+                'fieldValue'                     : ''
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'email_attachments',
+                'fieldLabel'                     : 'Attachments',
+                'fieldType'                      : 'select2',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'List of documents from the job you can attach to the email.',
+                'fieldBazScan'                   : true,
+                'fieldBazJstreeSearch'           : true,
+                'fieldBazPostOnUpdate'           : false,
+                'fieldDataSelect2Multiple'       : true,
+                'fieldDataSelect2Options'        : jobDocuments,
+                'fieldDataSelect2OptionsKey'     : 'uuid',
+                'fieldDataSelect2OptionsValue'   : 'org_file_name',
+                'fieldDataSelect2OptionsArray'   : true,
+                'fieldDataSelect2OptionsSelected': ''
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('buttons',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'buttonType'                     : 'button',
+                'buttons'                        :
+                    [
+                        'send-email'    : [
+                            'title'                   : 'Send',
+                            'icon'                    : 'paper-plane'
+                        ]
+                    ]
+            ]
+        )}}
+    </div>
+</div>

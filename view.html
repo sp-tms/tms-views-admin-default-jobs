@@ -1,1 +1,43 @@
-Jobs Main View
+{% if job['id'] is defined %}
+    {% set jobId = job['id'] %}
+    {% set title = 'Job (LR# ' ~ job['id'] ~ ')' %}
+    {% if formattedInvoice is not defined %}
+        {% if job['invoice']['invoice_no'] is defined %}
+            {% set formattedInvoice = job['invoice']['invoice_no'] %}
+        {% endif %}
+    {% endif %}
+    {% if job['invoice']['invoice_no'] is defined %}
+        {% set title = 'Job - LR# ' ~ job['id'] ~ ' | INVOICE# ' ~ formattedInvoice %}
+    {% endif %}
+{% else %}
+    {% set jobId = '' %}
+    {% set title = 'New Job' %}
+{% endif %}
+{{adminltetags.useTag('content',
+    [
+        'component'                     : component,
+        'componentName'                 : componentName,
+        'componentId'                   : componentId,
+        'parentComponentId'             : parent,
+        'sectionId'                     : 'main',
+        'contentType'                   : 'sectionWithForm',
+        'cardHeader'                    : true,
+        'cardFooter'                    : true,
+        'cardType'                      : 'primary',
+        'cardIcon'                      : 'clipboard-list',
+        'cardTitle'                     : title,
+        'cardAdditionalClass'           : 'rounded-0',
+        'cardShowTools'                 : ['activityLogs'],
+        'cardBodyInclude'               : 'jobs/form',
+        'formButtons'                   :
+        [
+            'updateButtonId'                : jobId,
+            'addActionUrl'                  : 'jobs/add',
+            'addSuccessRedirectUrl'         : 'jobs',
+            'updateActionUrl'               : 'jobs/update',
+            'updateSuccessRedirectUrl'      : 'jobs',
+            'cancelActionUrl'               : 'jobs',
+            'closeActionUrl'                : 'jobs'
+        ]
+    ]
+)}}

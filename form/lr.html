@@ -1,0 +1,650 @@
+{% if job['id'] is defined %}
+    {% set jobId = job['id'] %}
+    {% set jobLr = job['id'] %}
+    {% set jobFy = job['financial_year'] %}
+    {% set jobDate = job['date'] %}
+    {% set jobStatus = job['status'] %}
+    {% set jobVehicle = job['vehicle_id'] %}
+    {% set jobOrganisation = job['organisation_id'] %}
+    {% set jobCompany = job['company_id'] %}
+    {% set jobConsignor = job['from_company_id'] %}
+    {% set jobConsignorAddress = job['from_company_address_id'] %}
+    {% set jobConsignee = job['to_company_id'] %}
+    {% set jobConsigneeAddress = job['to_company_address_id'] %}
+    {% set jobLrNotes = job['lr_notes'] %}
+    {% set jobLrInternalNotes = job['lr_dev_notes'] %}
+{% else %}
+    {% set jobId = '' %}
+    {% set jobLr = job['lr_no'] %}
+    {% set jobFy = job['financial_year'] %}
+    {% set jobDate = job['date'] %}
+    {% set jobStatus = 0 %}
+    {% set jobVehicle = '' %}
+    {% set jobOrganisation = '' %}
+    {% set jobCompany = '' %}
+    {% set jobConsignor = '' %}
+    {% set jobConsignorAddress = '' %}
+    {% set jobConsignee = '' %}
+    {% set jobConsigneeAddress = '' %}
+    {% set jobLrNotes = '' %}
+    {% set jobLrInternalNotes = '' %}
+{% endif %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'id',
+                'fieldLabel'                            : 'ID',
+                'fieldType'                             : 'input',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'ID',
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldHidden'                           : true,
+                'fieldDisabled'                         : true,
+                'fieldValue'                            : jobId
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'lr',
+                'fieldLabel'                            : 'Lorry Receipt #',
+                'fieldType'                             : 'input',
+                'fieldInputTypeTextFilter'              : 'positiveInt',
+                'fieldDataInputMaxLength'               : 10,
+                'fieldDataInputMinNumber'               : 0,
+                'fieldDataInputMaxNumber'               : 9999999999,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Lorry Receipt #',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'check-lr'         : [
+                            'title'                         : false,
+                            'icon'                          : 'check',
+                            'noMargin'                      : true,
+                            'type'                          : 'success',
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ],
+                        'edit-lr'         : [
+                            'title'                         : false,
+                            'icon'                          : 'wand-magic-sparkles',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : jobLr
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'financial_year',
+                'fieldLabel'                            : 'Financial Year',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 10,
+                'fieldHelp'                             : true,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Financial Year',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'edit-financial_year'         : [
+                            'title'                         : false,
+                            'icon'                          : 'wand-magic-sparkles',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : jobFy
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'date',
+                'fieldLabel'                            : 'Date',
+                'fieldType'                             : 'flatpickr',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Date',
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : jobDate
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'status',
+                'fieldLabel'                            : 'Status',
+                'fieldType'                             : 'select2',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : "Select status",
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldDataSelect2Options'               : lrStatus,
+                'fieldDataSelect2OptionsKey'            : 'id',
+                'fieldDataSelect2OptionsValue'          : 'name',
+                'fieldDataSelect2OptionsArray'          : true,
+                'fieldDataSelect2OptionsSelected'       : jobStatus
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'vehicle_id',
+                'fieldLabel'                            : 'Vehicle',
+                'fieldType'                             : 'select2',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : "Select vehicle",
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldDataSelect2Options'               : vehicles,
+                'fieldDataSelect2OptionsKey'            : 'id',
+                'fieldDataSelect2OptionsValue'          : 'registration_no',
+                'fieldDataSelect2OptionsArray'          : true,
+                'fieldDataSelect2OptionsSelected'       : jobVehicle
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'organisation_id',
+                'fieldLabel'                            : 'Organisation',
+                'fieldType'                             : 'select2',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : "Select organisation",
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldDataSelect2Options'               : organisations,
+                'fieldDataSelect2OptionsKey'            : 'id',
+                'fieldDataSelect2OptionsValue'          : 'name',
+                'fieldDataSelect2OptionsArray'          : true,
+                'fieldDataSelect2OptionsSelected'       : jobOrganisation
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'company_id',
+                'fieldLabel'                            : 'Customer',
+                'fieldType'                             : 'select2',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : "Select customer",
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldDataSelect2Options'               : customers,
+                'fieldDataSelect2OptionsKey'            : 'id',
+                'fieldDataSelect2OptionsValue'          : 'name',
+                'fieldDataSelect2OptionsArray'          : true,
+                'fieldDataSelect2OptionsSelected'       : jobCompany
+            ]
+        )}}
+    </div>
+</div>
+<hr>
+<div class="row vdivide">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'from_company_id',
+                        'fieldLabel'                            : 'Consignor',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select consignor",
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : customers,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'name',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobConsignor
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'from_company_address_id',
+                        'fieldLabel'                            : 'Consignor Address',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select organisation",
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : consignorAddresses,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'address_reference',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobConsignorAddress
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            {% set from_address_reference = '-' %}
+            {% set from_attention_to = '-' %}
+            {% set from_street_address = '-' %}
+            {% set from_street_address_2 = '-' %}
+            {% set from_street_address_3 = '-' %}
+            {% set from_street_address_4 = '-' %}
+            {% set from_city = '-' %}
+            {% set from_state = '-' %}
+            {% set fromNoinfoHidden = '' %}
+            {% set fromHidden = 'hidden' %}
+            {% set fromStreet3Hidden = 'hidden' %}
+            {% set fromStreet4Hidden = 'hidden' %}
+            {% if consignorAddresses[jobConsignorAddress] is defined %}
+                {% if consignorAddresses[jobConsignorAddress]['address_reference'] != '' %}
+                    {% set from_address_reference = consignorAddresses[jobConsignorAddress]['address_reference'] %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['attention_to'] != '' %}
+                    {% set from_attention_to = consignorAddresses[jobConsignorAddress]['attention_to'] %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['street_address'] != '' %}
+                    {% set from_street_address = consignorAddresses[jobConsignorAddress]['street_address'] %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['street_address_2'] != '' %}
+                    {% set from_street_address_2 = consignorAddresses[jobConsignorAddress]['street_address_2'] %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['street_address_3'] != '' %}
+                    {% set from_street_address_3 = consignorAddresses[jobConsignorAddress]['street_address_3'] %}
+                {% endif %}
+                {% if from_street_address_3 != '' %}
+                    {% set fromStreet3Hidden = '' %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['street_address_4'] != '' %}
+                    {% set from_street_address_4 = consignorAddresses[jobConsignorAddress]['street_address_4'] %}
+                {% endif %}
+                {% if from_street_address_4 != '' %}
+                    {% set fromStreet4Hidden = '' %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['city_name'] != '' %}
+                    {% set from_city = consignorAddresses[jobConsignorAddress]['city_name'] %}
+                {% endif %}
+                {% if consignorAddresses[jobConsignorAddress]['state_name'] != '' %}
+                    {% set from_state = consignorAddresses[jobConsignorAddress]['state_name'] %}
+                {% endif %}
+                {% set fromNoinfoHidden = 'hidden' %}
+                {% set fromHidden = '' %}
+            {% endif %}
+            <div class="col" id="from_company_details_noinfo" {{fromNoinfoHidden}}>
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'from_company_details_noinfo',
+                        'fieldLabel'                            : 'Consignor Name & Address:',
+                        'fieldHidden'                           : false,
+                        'fieldType'                             : 'html',
+                        'fieldBazScan'                          : false,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : false,
+                        'fieldHtmlContent'                      : 'Select consignor & consignor address.'
+                    ]
+                )}}
+            </div>
+            <div class="col" id="from_company_details_info" {{fromHidden}}>
+                <div class="row">
+                    <div class="col">
+                        <label>Address Reference: </label>
+                        <span id="from_address_reference">{{from_address_reference}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Attention To: </label>
+                        <span id="from_attention_to">{{from_attention_to}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Street Address: </label>
+                        <span id="from_street_address">{{from_street_address}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Street Address 2: </label>
+                        <span id="from_street_address_2">{{from_street_address_2}}</span>
+                    </div>
+                </div>
+                <div class="row" id="from_street_address_3_div" {{fromStreet3Hidden}}>
+                    <div class="col">
+                        <label>Street Address 3: </label>
+                        <span id="from_street_address_3">{{from_street_address_3}}</span>
+                    </div>
+                </div>
+                <div class="row" id="from_street_address_4_div" {{fromStreet4Hidden}}>
+                    <div class="col">
+                        <label>Street Address 4: </label>
+                        <span id="from_street_address_4">{{from_street_address_4}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>City: </label>
+                        <span id="from_city">{{from_city}}</span>
+                    </div>
+                    <div class="col">
+                        <label>State: </label>
+                        <span id="from_state">{{from_state}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'to_company_id',
+                        'fieldLabel'                            : 'Consignee',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select consignee",
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : customers,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'name',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobConsignee
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'to_company_address_id',
+                        'fieldLabel'                            : 'Consignee Address',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select customer",
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : consigneeAddresses,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'address_reference',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobConsigneeAddress
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            {% set to_address_reference = '-' %}
+            {% set to_attention_to = '-' %}
+            {% set to_street_address = '-' %}
+            {% set to_street_address_2 = '-' %}
+            {% set to_street_address_3 = '-' %}
+            {% set to_street_address_4 = '-' %}
+            {% set to_city = '-' %}
+            {% set to_state = '-' %}
+            {% set toNoinfoHidden = '' %}
+            {% set toHidden = 'hidden' %}
+            {% set toStreet3Hidden = 'hidden' %}
+            {% set toStreet4Hidden = 'hidden' %}
+            {% if consigneeAddresses[jobConsigneeAddress] is defined %}
+                {% if consigneeAddresses[jobConsigneeAddress]['address_reference'] != '' %}
+                    {% set to_address_reference = consigneeAddresses[jobConsigneeAddress]['address_reference'] %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['attention_to'] != '' %}
+                    {% set to_attention_to = consigneeAddresses[jobConsigneeAddress]['attention_to'] %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['street_address'] != '' %}
+                    {% set to_street_address = consigneeAddresses[jobConsigneeAddress]['street_address'] %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['street_address_2'] != '' %}
+                    {% set to_street_address_2 = consigneeAddresses[jobConsigneeAddress]['street_address_2'] %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['street_address_3'] != '' %}
+                    {% set to_street_address_3 = consigneeAddresses[jobConsigneeAddress]['street_address_3'] %}
+                {% endif %}
+                {% if to_street_address_3 != '' %}
+                    {% set toStreet3Hidden = '' %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['street_address_4'] != '' %}
+                    {% set to_street_address_4 = consigneeAddresses[jobConsigneeAddress]['street_address_4'] %}
+                {% endif %}
+                {% if to_street_address_4 != '' %}
+                    {% set toStreet4Hidden = '' %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['city_name'] != '' %}
+                    {% set to_city = consigneeAddresses[jobConsigneeAddress]['city_name'] %}
+                {% endif %}
+                {% if consigneeAddresses[jobConsigneeAddress]['state_name'] != '' %}
+                    {% set to_state = consigneeAddresses[jobConsigneeAddress]['state_name'] %}
+                {% endif %}
+                {% set toNoinfoHidden = 'hidden' %}
+                {% set toHidden = '' %}
+            {% endif %}
+            <div class="col" id="to_company_details_noinfo" {{toNoinfoHidden}}>
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'to_company_details_noinfo',
+                        'fieldLabel'                            : 'Consignee Name & Address:',
+                        'fieldHidden'                           : false,
+                        'fieldType'                             : 'html',
+                        'fieldBazScan'                          : false,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : false,
+                        'fieldHtmlContent'                      : 'Select consignee & consignee address.'
+                    ]
+                )}}
+            </div>
+            <div class="col" id="to_company_details_info" {{toHidden}}>
+                <div class="row">
+                    <div class="col">
+                        <label>Address Reference: </label>
+                        <span id="to_address_reference">{{to_address_reference}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Attention To: </label>
+                        <span id="to_attention_to">{{to_attention_to}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Street Address: </label>
+                        <span id="to_street_address">{{to_street_address}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Street Address 2: </label>
+                        <span id="to_street_address_2">{{to_street_address_2}}</span>
+                    </div>
+                </div>
+                <div class="row" id="to_street_address_3_div" {{toStreet3Hidden}}>
+                    <div class="col">
+                        <label>Street Address 3: </label>
+                        <span id="to_street_address_3">{{to_street_address_3}}</span>
+                    </div>
+                </div>
+                <div class="row" id="to_street_address_4_div" {{toStreet4Hidden}}>
+                    <div class="col">
+                        <label>Street Address 4: </label>
+                        <span id="to_street_address_4">{{to_street_address_4}}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>City: </label>
+                        <span id="to_city">{{to_city}}</span>
+                    </div>
+                    <div class="col">
+                        <label>State: </label>
+                        <span id="to_state">{{to_state}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'lr_notes',
+                'fieldLabel'                     : 'LR Notes',
+                'fieldType'                      : 'textarea',
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Additional notes for the lr',
+                'fieldRequired'                  : false,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : true,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldDataInputMaxLength'        : 2048,
+                'fieldTextareaRows'              : 2,
+                'fieldValue'                     : jobLrNotes
+            ]
+        )}}
+    </div>
+    {% if access.auth.check() and access.auth.account()['id'] == '1' %}
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'lr_dev_notes',
+                    'fieldLabel'                     : 'LR Notes (Internal)',
+                    'fieldType'                      : 'textarea',
+                    'fieldDataMaxLength'             : 1024,
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'Internal notes for the lr. Will not show on LR.',
+                    'fieldRequired'                  : false,
+                    'fieldBazScan'                   : true,
+                    'fieldBazPostOnCreate'           : true,
+                    'fieldBazPostOnUpdate'           : true,
+                    'fieldDataInputMaxLength'        : 2048,
+                    'fieldTextareaRows'              : 2,
+                    'fieldValue'                     : jobLrInternalNotes
+                ]
+            )}}
+        </div>
+    {% endif %}
+</div>
