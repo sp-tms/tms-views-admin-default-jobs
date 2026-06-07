@@ -149,7 +149,6 @@ dataCollectionSectionForm['vars']['to_company_address'] = JSON.parse('{{consigne
 dataCollectionSectionForm['vars']['uoms'] = JSON.parse('{{uoms}}');
 dataCollectionSectionForm['vars']['charges'] = JSON.parse('{{charges}}');
 dataCollectionSectionForm['vars']['job'] = JSON.parse('{{jobDetails}}');
-dataCollectionSectionForm['vars']['storageResponse'] = { };
 
 dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
     $('.editCharge').off();
@@ -1046,7 +1045,6 @@ dataCollectionSection =
         '{{componentId}}-{{sectionId}}-show_customer_pterms'        : { },
         '{{componentId}}-{{sectionId}}-preview_documents'           : { },
         '{{componentId}}-{{sectionId}}-documents'                   : {
-            placeholder: 'JOB DOCUMENTS',
             afterInit: function() {
                 if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-documents-table')) {
                     var columns =

@@ -46,7 +46,7 @@
             {% else %}
                 <img src="{{links.images('general/logo.png')}}" class="rounded-sm" style="position:relative;top: -1px; width:80px;" alt="Company Logo">
             {% endif %}
-            <h1 style="display: inline">{{ job['organisation']['name'] }}</h1>
+            <h1 style="display: inline;position: relative;top: 7px;">{{ job['organisation']['name'] }}</h1>
             <h5>{{ job['organisation']['description'] }}</h5>
             {% if job['organisation']['addresses'][0] is defined %}
                 {% if job['organisation']['addresses'][0]['street_address'] != '' %}
