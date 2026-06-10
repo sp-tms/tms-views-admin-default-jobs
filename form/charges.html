@@ -1,4 +1,4 @@
-{% if job['status'] != '1' %}
+{% if job['status'] is not defined or job['status'] is defined and job['status'] != '2' %}
     <div class="row">
         <div class="col">
             {{adminltetags.useTag('fields',
@@ -34,6 +34,7 @@
                     'fieldBazScan'                   : true,
                     'fieldBazPostOnCreate'           : false,
                     'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Create'         : true,
                     'fieldDataSelect2Options'        : charges,
                     'fieldDataSelect2OptionsKey'     : 'id',
                     'fieldDataSelect2OptionsValue'   : 'display_name',
@@ -99,7 +100,7 @@
                     'fieldDataInputMaxLength'        : 10,
                     'fieldDataInputMinNumber'        : 0,
                     'fieldDataInputMaxNumber'        : 9999999999,
-                    'fieldRequired'                  : false,
+                    'fieldRequired'                  : true,
                     'fieldDisabled'                  : true,
                     'fieldBazScan'                   : true,
                     'fieldBazPostOnCreate'           : false,
@@ -124,6 +125,7 @@
                     'fieldBazScan'                   : true,
                     'fieldBazPostOnCreate'           : false,
                     'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Create'         : true,
                     'fieldDataSelect2Options'        : uoms,
                     'fieldDataSelect2OptionsKey'     : 'id',
                     'fieldDataSelect2OptionsValue'   : 'name',
@@ -149,6 +151,7 @@
                     'fieldDataInputMaxNumber'        : 9999999999,
                     'fieldHelp'                      : true,
                     'fieldHelpTooltipContent'        : 'Rate',
+                    'fieldRequired'                  : true,
                     'fieldDisabled'                  : true,
                     'fieldBazScan'                   : true,
                     'fieldBazPostOnCreate'           : false,
@@ -173,6 +176,7 @@
                     'fieldBazScan'                   : true,
                     'fieldBazPostOnCreate'           : false,
                     'fieldBazPostOnUpdate'           : false,
+                    'fieldDataSelect2Create'         : true,
                     'fieldDataSelect2Options'        : uoms,
                     'fieldDataSelect2OptionsKey'     : 'id',
                     'fieldDataSelect2OptionsValue'   : 'name',
@@ -252,14 +256,15 @@
     <hr>
 {% endif %}
 {% set tableData = '' %}
+{% set jobCharges = '' %}
 {% if job['charges'] is defined and job['charges']|length > 0 %}
+    {% set jobCharges = job['charges']|length %}
     {% for charge in job['charges'] %}
         {% set tableData = tableData ~ '<tr id="' ~ charge['id'] ~ '">' %}
             {% if charges is defined and charges[charge['charge_id']] is defined %}
                 {% set tableData = tableData ~ '<td>' ~ charges[charge['charge_id']]['display_name'] ~ '</td>' %}
             {% else %}
-                {% set tableData = tableData ~ '<td>UNKNOWN</td>' %}
-                {% set tableData = tableData ~ '<td>UNKNOWN</td>' %}
+                {% set tableData = tableData ~ '<td>-</td>' %}
             {% endif %}
             {% if charge['visibility'] %}
                 {% if charge['visibility'] == '1' %}
@@ -301,7 +306,7 @@
             {% else %}
                 {% set tableData = tableData ~ '<td>-</td>' %}
             {% endif %}
-            {% if job['status'] != '1' %}
+            {% if job['status'] is not defined or job['status'] is defined and job['status'] != '2' %}
                 {% set chargesButtons = [] %}
                 {% set chargesButtons['edit-' ~ charge['id']] = [
                         'title'                   : false,
@@ -352,13 +357,19 @@
                 'sectionId'                      : sectionId,
                 'fieldId'                        : 'charges',
                 'fieldLabel'                     : 'Charges',
-                'fieldType'                      : 'html',
-                'fieldAdditionalClass'           : 'mb-0',
+                'fieldType'                      : 'input',
+                'fieldInputTypeTextFilter'       : 'positiveInt',
+                'fieldDataInputMinNumber'        : 0,
+                'fieldDataInputMaxNumber'        : 999,
+                'fieldAdditionalClass'           : 'mb-1',
                 'fieldHelp'                      : true,
-                'fieldHelpTooltipContent'        : 'List of charges for this LR & Invoice.',
+                'fieldHelpTooltipContent'        : 'List of charges for this Lorry receipt & Invoice.',
                 'fieldRequired'                  : true,
                 'fieldBazScan'                   : true,
-                'fieldBazPostOnUpdate'           : true
+                'fieldBazJstreeSearch'           : true,
+                'fieldBazPostOnCreate'           : true,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldValue'                     : jobCharges
             ]
         )}}
     </div>
@@ -375,7 +386,7 @@
                     <th class="text-uppercase">{{ currencySymbol }} Rate</th>
                     <th class="text-uppercase">Rate UoM</th>
                     <th class="text-uppercase">{{ currencySymbol }} AMOUNT</th>
-                    {% if job['status'] != '1' %}
+                    {% if job['status'] is not defined or job['status'] is defined and job['status'] != '2' %}
                         <th class="text-uppercase">ACTIONS</th>
                     {% endif %}
                 </tr>

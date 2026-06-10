@@ -1,0 +1,816 @@
+<!-- htmlhint tag-pair:false -->
+{% if job['trip'] is defined %}
+    {% set jobVoucher = job['trip']['voucher_no'] %}
+    {% set jobEmployeeId = job['trip']['employee_id'] %}
+    {% set jobTripRoute = job['trip']['route'] %}
+    {% set jobTripFromDate = job['trip']['from_date'] %}
+    {% set jobTripToDate = job['trip']['from_date'] %}
+    {% set jobTripLoadOdoReading = job['trip']['load_odo_reading'] %}
+    {% set jobTripLoadLocationId = job['trip']['load_location_id'] %}
+    {% set jobTripLoadLocationInTime = job['trip']['load_location_in_time'] %}
+    {% set jobTripLoadLocationOutTime = job['trip']['load_location_out_time'] %}
+    {% set jobTripLoadQuantity = job['trip']['load_quantity'] %}
+    {% set jobTripLoadNotes = job['trip']['load_notes'] %}
+    {% set jobTripUnloadOdoReading = job['trip']['unload_odo_reading'] %}
+    {% set jobTripUnloadLocationId = job['trip']['load_location_id'] %}
+    {% set jobTripUnloadLocationInTime = job['trip']['load_location_in_time'] %}
+    {% set jobTripUnloadLocationOutTime = job['trip']['load_location_out_time'] %}
+    {% set jobTripUnloadQuantity = job['trip']['unload_quantity'] %}
+    {% set jobTripWastage = job['trip']['wastage'] %}
+    {% set jobTripUnloadNotes = job['trip']['unload_notes'] %}
+    {% set jobTripNotes = job['trip']['trip_notes'] %}
+{% else %}
+    {% set jobVoucher = '' %}
+    {% set jobEmployeeId = '' %}
+    {% set jobTripRoute = '' %}
+    {% set jobTripFromDate = '' %}
+    {% set jobTripToDate = '' %}
+    {% set jobTripLoadOdoReading = '' %}
+    {% set jobTripLoadLocationId = '' %}
+    {% set jobTripLoadLocationInTime = '' %}
+    {% set jobTripLoadLocationOutTime = '' %}
+    {% set jobTripLoadQuantity = '' %}
+    {% set jobTripLoadNotes = '' %}
+    {% set jobTripUnloadOdoReading = '' %}
+    {% set jobTripUnloadLocationId = '' %}
+    {% set jobTripUnloadLocationInTime = '' %}
+    {% set jobTripUnloadLocationOutTime = '' %}
+    {% set jobTripUnloadQuantity = '' %}
+    {% set jobTripWastage = '' %}
+    {% set jobTripUnloadNotes = '' %}
+    {% set jobTripNotes = '' %}
+{% endif %}
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                     : component,
+                'componentName'                 : componentName,
+                'componentId'                   : componentId,
+                'sectionId'                     : sectionId,
+                'fieldId'                       : 'queue',
+                'fieldLabel'                    : false,
+                'fieldType'                     : 'counters',
+                'fieldCountersPlacementType'    : 'horizontal',
+                'fieldCounters'                 :
+                    [
+                        'no_of_expenses'       :
+                            [
+                                'id'        : 'no_of_expenses',
+                                'title'     : 'Number of Expenses',
+                                'type'      : 'info',
+                                'value'     : '0'
+                            ],
+                        'total_expenses_amount'        :
+                            [
+                                'id'        : 'total_expenses_amount',
+                                'title'     : 'Total Expenses Amount',
+                                'type'      : 'info',
+                                'value'     : '0'
+                            ],
+                        'no_of_litres'       :
+                            [
+                                'id'        : 'no_of_litres',
+                                'title'     : 'Number of Litres',
+                                'type'      : 'info',
+                                'value'     : '0'
+                            ],
+                        'total_fuel_amount'        :
+                            [
+                                'id'        : 'total_fuel_amount',
+                                'title'     : 'Total Fuel Amount',
+                                'type'      : 'info',
+                                'value'     : '0'
+                            ]
+                    ]
+            ]
+        )}}
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'voucher_no',
+                'fieldLabel'                            : 'Voucher #',
+                'fieldType'                             : 'input',
+                'fieldInputTypeTextFilter'              : 'positiveInt',
+                'fieldDataInputMaxLength'               : 10,
+                'fieldDataInputMinNumber'               : 0,
+                'fieldDataInputMaxNumber'               : 9999999999,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Voucher #',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'check-voucher'         : [
+                            'title'                         : false,
+                            'icon'                          : 'check',
+                            'noMargin'                      : true,
+                            'type'                          : 'success',
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ],
+                        'edit-voucher'         : [
+                            'title'                         : false,
+                            'icon'                          : 'wand-magic-sparkles',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : jobVoucher
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'employee_id',
+                'fieldLabel'                            : 'Trip Driver',
+                'fieldType'                             : 'select2',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : "Select trip driver",
+                'fieldRequired'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldDataSelect2Options'               : employees,
+                'fieldDataSelect2OptionsKey'            : 'id',
+                'fieldDataSelect2OptionsValue'          : 'full_name',
+                'fieldDataSelect2OptionsArray'          : true,
+                'fieldDataSelect2OptionsSelected'       : jobEmployeeId
+            ]
+        )}}
+    </div>
+</div>
+<hr>
+<div class="row">
+    {% if job['trip']['route'] is defined %}
+        {% set routeArr = job['trip']['route'] %}
+    {% else %}
+        {% set routeArr[0]['city_id'] = consignorAddresses[job['from_company_address_id']]['city_id'] %}
+        {% set routeArr[0]['city_name'] = consignorAddresses[job['from_company_address_id']]['city_name'] %}
+        {% set routeArr[0]['state_id'] = consignorAddresses[job['from_company_address_id']]['state_id'] %}
+        {% set routeArr[0]['state_name'] = consignorAddresses[job['from_company_address_id']]['state_name'] %}
+        {% set routeArr[1]['city_id'] = consigneeAddresses[job['to_company_address_id']]['city_id'] %}
+        {% set routeArr[1]['city_name'] = consigneeAddresses[job['to_company_address_id']]['city_name'] %}
+        {% set routeArr[1]['state_id'] = consigneeAddresses[job['to_company_address_id']]['state_id'] %}
+        {% set routeArr[1]['state_name'] = consigneeAddresses[job['to_company_address_id']]['state_name'] %}
+    {% endif %}
+    {% set route = '<div id="trip-sortable-route">' %}
+    {% set locked = '' %}
+    {% for routes in routeArr %}
+        {% if loop.first or loop.last %}
+            {% set locked = 'locked' %}
+        {% else %}
+            {% set locked = '' %}
+        {% endif %}
+        {% set route = route ~ '<h6 class="m-0 d-inline ' ~ locked ~ '" data-route-seq="' ~ loop.index ~'" data-route-city-id="' ~ routes['city_id'] ~ '" data-route-city-name="' ~ routes['city_name'] ~ '" data-route-state-id="' ~ routes['state_id'] ~ '" data-route-state-name="' ~ routes['state_name'] ~ '"><span class="text-primary text-uppercase">' ~ routes['city_name'] ~ ' (' ~ routes['state_name'] ~ ')</span>' %}
+        {% if not loop.last %}
+            {% set route = route ~ ' <i class="text-success fa-solid fa-arrow-right"></i> ' %}
+        {% endif %}
+        {% set route = route ~ '</h6>' %}
+    {% endfor %}
+    {% set route = route ~ '</div>' %}
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'route_city_id',
+                'fieldLabel'                            : 'Route City',
+                'fieldType'                             : 'input',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'City ID.',
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : true,
+                'fieldHidden'                           : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : false,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : ''
+            ]
+        )}}
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'route_state_id',
+                'fieldLabel'                            : 'Route State ID',
+                'fieldType'                             : 'input',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'State ID.',
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : true,
+                'fieldHidden'                           : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : false,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : ''
+            ]
+        )}}
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'route_state_name',
+                'fieldLabel'                            : 'Route State Name',
+                'fieldType'                             : 'input',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'State Name.',
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : true,
+                'fieldHidden'                           : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : false,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : ''
+            ]
+        )}}
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'route_city_name',
+                'fieldLabel'                            : 'Search Route City',
+                'fieldType'                             : 'input',
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Enter city to search and then click add or remove to add or remove from route.',
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'add-city'         : [
+                            'title'                         : 'Add Route City',
+                            'icon'                          : 'plus',
+                            'noMargin'                      : true,
+                            'disabled'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ],
+                        'remove-city'         : [
+                            'title'                         : 'Remove Route City',
+                            'icon'                          : 'minus',
+                            'noMargin'                      : true,
+                            'disabled'                      : true,
+                            'type'                          : 'secondary',
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : false,
+                'fieldDisabled'                         : false,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : false,
+                'fieldBazPostOnCreate'                  : false,
+                'fieldBazPostOnUpdate'                  : false,
+                'fieldValue'                            : ''
+            ]
+        )}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'route',
+                'fieldLabel'                            : 'Trip Route',
+                'fieldHidden'                           : false,
+                'fieldType'                             : 'html',
+                'fieldBazScan'                          : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldHtmlContent'                      : route
+            ]
+        )}}
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'from_date',
+                        'fieldLabel'                            : 'From Date',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'From Date',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripFromDate
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'to_date',
+                        'fieldLabel'                            : 'To Date',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'To Date',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : true,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripToDate
+                    ]
+                )}}
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'start_odo_reading',
+                        'fieldLabel'                     : 'Start Odo Reading',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Start Odo Reading',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'end_odo_reading',
+                        'fieldLabel'                     : 'End Odo Reading',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'End Odo Reading',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row vdivide">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'loading_information',
+                        'fieldLabel'                     : 'Loading Information',
+                        'fieldType'                      : 'html',
+                        'fieldAdditionalClass'           : 'mb-0 text-info',
+                        'fieldHelp'                      : false,
+                        'fieldHelpTooltipContent'        : 'Loading Information',
+                        'fieldRequired'                  : false,
+                        'fieldBazScan'                   : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'load_odo_reading',
+                        'fieldLabel'                     : 'Load Odo Reading',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Load Odo Reading',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : jobTripLoadOdoReading
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'load_location_id',
+                        'fieldLabel'                            : 'Load From',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select load location",
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : consignorAddresses,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'address_reference',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobTripLoadLocationId
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'load_location_in_time',
+                        'fieldLabel'                            : 'Load Location In Time',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Load Location In Time',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripLoadLocationInTime
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'load_location_out_time',
+                        'fieldLabel'                            : 'Load Location Out Time',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Load Location Out Time',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripLoadLocationOutTime
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'load_quantity',
+                        'fieldLabel'                     : 'Load Quantity',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Load Quantity',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : jobTripLoadQuantity
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'load_notes',
+                        'fieldLabel'                     : 'Load Notes',
+                        'fieldType'                      : 'textarea',
+                        'fieldDataMaxLength'             : 1024,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Load Notes',
+                        'fieldRequired'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : true,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldDataInputMaxLength'        : 2048,
+                        'fieldTextareaRows'              : 2,
+                        'fieldValue'                     : jobTripLoadNotes
+                    ]
+                )}}
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'unloading_information',
+                        'fieldLabel'                     : 'Unloading Information',
+                        'fieldType'                      : 'html',
+                        'fieldAdditionalClass'           : 'mb-0 text-info',
+                        'fieldHelp'                      : false,
+                        'fieldHelpTooltipContent'        : 'Unloading Information',
+                        'fieldRequired'                  : false,
+                        'fieldBazScan'                   : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'unload_odo_reading',
+                        'fieldLabel'                     : 'Unload Odo Reading',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Unload Odo Reading',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : jobTripUnloadOdoReading
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'unload_location_id',
+                        'fieldLabel'                            : 'Unload To',
+                        'fieldType'                             : 'select2',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : "Select unload location",
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldDataSelect2Options'               : consigneeAddresses,
+                        'fieldDataSelect2OptionsKey'            : 'id',
+                        'fieldDataSelect2OptionsValue'          : 'address_reference',
+                        'fieldDataSelect2OptionsArray'          : true,
+                        'fieldDataSelect2OptionsSelected'       : jobTripUnloadLocationId
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'unload_location_in_time',
+                        'fieldLabel'                            : 'Unload Location In Time',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Unload Location In Time',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripUnloadLocationInTime
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'unload_location_out_time',
+                        'fieldLabel'                            : 'Unload Location Out Time',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Unload Location Out Time',
+                        'fieldRequired'                         : false,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : true,
+                        'fieldValue'                            : jobTripUnloadLocationOutTime
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'unload_quantity',
+                        'fieldLabel'                     : 'Unload Quantity',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Unload Quantity',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : jobTripUnloadQuantity
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'wastage',
+                        'fieldLabel'                     : 'Wastage',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Wastage',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldValue'                     : jobTripWastage
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'unload_notes',
+                        'fieldLabel'                     : 'Unload Notes',
+                        'fieldType'                      : 'textarea',
+                        'fieldDataMaxLength'             : 1024,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Unload Notes',
+                        'fieldRequired'                  : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : true,
+                        'fieldBazPostOnUpdate'           : true,
+                        'fieldDataInputMaxLength'        : 2048,
+                        'fieldTextareaRows'              : 2,
+                        'fieldValue'                     : jobTripUnloadNotes
+                    ]
+                )}}
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                      : component,
+                'componentName'                  : componentName,
+                'componentId'                    : componentId,
+                'sectionId'                      : sectionId,
+                'fieldId'                        : 'trip_notes',
+                'fieldLabel'                     : 'Trip Notes',
+                'fieldType'                      : 'textarea',
+                'fieldDataMaxLength'             : 1024,
+                'fieldHelp'                      : true,
+                'fieldHelpTooltipContent'        : 'Trip Notes.',
+                'fieldRequired'                  : false,
+                'fieldBazScan'                   : true,
+                'fieldBazPostOnCreate'           : false,
+                'fieldBazPostOnUpdate'           : true,
+                'fieldDataInputMaxLength'        : 2048,
+                'fieldTextareaRows'              : 2,
+                'fieldValue'                     : jobTripNotes
+            ]
+        )}}
+    </div>
+</div>

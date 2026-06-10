@@ -1,0 +1,448 @@
+{% if jobVoucher is defined and jobVoucher != '' and jobEmployeeId is defined and jobEmployeeId != '0' %}
+    {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_id',
+                        'fieldLabel'                     : 'Expense ID',
+                        'fieldType'                      : 'input',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Expense ID',
+                        'fieldRequired'                  : true,
+                        'fieldHidden'                    : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expenses_list',
+                        'fieldLabel'                     : 'Expense',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select a expense to add to expenses',
+                        'fieldRequired'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : expenses,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'display_name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'expense_date',
+                        'fieldLabel'                            : 'Expense Date',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Expense Date',
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : false,
+                        'fieldValue'                            : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'mode_of_payment',
+                        'fieldLabel'                     : 'Mode of payment',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select a expense mode of payment',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : expenseTransactionTypes,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'payment_tx_id',
+                        'fieldLabel'                     : 'Online Transaction ID',
+                        'fieldType'                      : 'input',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Online Transaction ID',
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : true,
+                        'fieldHidden'                    : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_qty',
+                        'fieldLabel'                     : 'Quantity',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Quantity of expense',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_qty_uom',
+                        'fieldLabel'                     : 'Expense Qty Uom',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select unit of measurement for expense quantity',
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : uoms,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_rate',
+                        'fieldLabel'                     : 'Expense Rate',
+                        'fieldType'                      : 'input',
+                        'fieldGroupPreAddonText'         : currencySymbol,
+                        'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Expense Rate',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_rate_uom',
+                        'fieldLabel'                     : 'Expense Rate Uom',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select unit of measurement for expense rate',
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : uoms,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'expense_amount',
+                        'fieldLabel'                     : 'expense_Amount',
+                        'fieldType'                      : 'input',
+                        'fieldInputToggleEdit'           : true,
+                        'fieldGroupPreAddonText'         : currencySymbol,
+                        'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                        'fieldDataInputMaxLength'        : 20,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 99999999999999,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Expense Amount',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('buttons',
+                    [
+                        'componentId'           : componentId,
+                        'sectionId'             : sectionId,
+                        'buttonType'            : 'button',
+                        'buttons'               :
+                            [
+                                'expenses-add' : [
+                                    'title'                   : 'Add',
+                                    'position'                : 'right',
+                                    'disabled'                : true,
+                                    'icon'                    : 'cog fa-spin',
+                                    'iconHidden'              : true,
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'size'                    : 'sm'
+                                ],
+                                'expenses-update' : [
+                                    'title'                   : 'Update',
+                                    'position'                : 'right',
+                                    'hidden'                  : true,
+                                    'icon'                    : 'cog fa-spin',
+                                    'iconHidden'              : true,
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'disabled'                : true,
+                                    'size'                    : 'sm'
+                                ],
+                                'expenses-cancel' : [
+                                    'title'                   : 'Cancel',
+                                    'type'                    : 'secondary',
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'position'                : 'right',
+                                    'size'                    : 'sm'
+                                ]
+                            ]
+                    ]
+                )}}
+            </div>
+        </div>
+        <hr>
+    {% endif %}
+    {% set tableData = '' %}
+    {% set jobExpenses = '' %}
+    {% if job['expenses'] is defined and job['expenses']|length > 0 %}
+        {% set jobExpenses = job['expenses']|length %}
+        {% for expense in job['expenses'] %}
+            {% if job['trip']['employee_id'] != expense['employee_id'] %}
+                {% continue %}
+            {% endif %}
+            {% set tableData = tableData ~ '<tr id="' ~ expense['id'] ~ '">' %}
+                {% if expenses is defined and expenses[expense['expense_id']] is defined %}
+                    {% set tableData = tableData ~ '<td>' ~ expenses[expense['expense_id']]['display_name'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['carry_forward'] %}
+                    {% set tableData = tableData ~ '<td>Y</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>N</td>' %}
+                {% endif %}
+                {% if expense['expense_date'] %}
+                    {% set tableData = tableData ~ '<td>' ~ expense['expense_date'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['mode_of_payment'] %}
+                    {% if expense['mode_of_payment'] == '1' %}
+                        {% set expense['mode_of_payment'] = 'CASH' %}
+                    {% elseif expense['mode_of_payment'] == '2' %}
+                        {% set expense['mode_of_payment'] = 'ONLINE' %}
+                    {% else %}
+                        {% set expense['mode_of_payment'] = '-' %}
+                    {% endif %}
+                    {% set tableData = tableData ~ '<td>' ~ expense['mode_of_payment'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['quantity'] %}
+                    {% set tableData = tableData ~ '<td>' ~ expense['quantity'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['quantity_uom_id'] %}
+                    {% if uoms is defined and uoms[expense['quantity_uom_id']] is defined %}
+                        {% set tableData = tableData ~ '<td>' ~ uoms[expense['quantity_uom_id']]['name'] ~ '</td>' %}
+                    {% endif %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['rate'] %}
+                    {% set tableData = tableData ~ '<td>' ~ expense['rate'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['rate_uom_id'] %}
+                    {% if uoms is defined and uoms[expense['rate_uom_id']] is defined %}
+                        {% set tableData = tableData ~ '<td>' ~ uoms[expense['rate_uom_id']]['name'] ~ '</td>' %}
+                    {% endif %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if expense['amount'] %}
+                    {% set tableData = tableData ~ '<td>' ~ expense['amount'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+                    {% set expensesButtons = [] %}
+                    {% set expensesButtons['edit-' ~ expense['id']] = [
+                            'title'                   : false,
+                            'icon'                    : 'edit',
+                            'size'                    : 'xs',
+                            'buttonAdditionalClass'   : 'editExpense text-white',
+                            'type'                    : 'warning',
+                            'data'                    : [
+                                'id'                  : expense['id']
+                            ]
+                        ]
+                    %}
+                    {% set expensesButtons['remove-' ~ expense['id']] = [
+                            'title'                   : false,
+                            'icon'                    : 'trash',
+                            'size'                    : 'xs',
+                            'buttonAdditionalClass'   : 'removeExpense text-white',
+                            'type'                    : 'danger',
+                            'data'                    : [
+                                'id'                  : expense['id']
+                            ]
+                        ]
+                    %}
+                    {% set tableData = tableData ~
+                        '<td>' ~ adminltetags.useTag('buttons',
+                                    [
+                                        'component'                     : component,
+                                        'componentName'                 : componentName,
+                                        'componentId'                   : componentId,
+                                        'parentComponentId'             : parent,
+                                        'sectionId'                     : sectionId,
+                                        'buttonType'                    : 'button',
+                                        'buttons'                       : expensesButtons
+                                    ]
+                                ) ~ '</td>'
+                    %}
+                {% endif %}
+                {% set tableData = tableData ~ '</tr>' %}
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'expenses',
+                    'fieldLabel'                     : 'Expenses',
+                    'fieldType'                      : 'input',
+                    'fieldInputTypeTextFilter'       : 'positiveInt',
+                    'fieldDataInputMinNumber'        : 0,
+                    'fieldDataInputMaxNumber'        : 999,
+                    'fieldAdditionalClass'           : 'mb-1',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'List of expenses for this voucher.',
+                    'fieldRequired'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazJstreeSearch'           : true,
+                    'fieldBazPostOnCreate'           : true,
+                    'fieldBazPostOnUpdate'           : true,
+                    'fieldValue'                     : jobExpenses
+                ]
+            )}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table id="{{componentId}}-{{sectionId}}-expenses-table" class="table table-sm table-hover responsive nowrap mb-0" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase">Name</th>
+                        <th class="text-uppercase">CF</th>
+                        <th class="text-uppercase">Date</th>
+                        <th class="text-uppercase">Mop</th>
+                        <th class="text-uppercase">QTY</th>
+                        <th class="text-uppercase">QTY UoM</th>
+                        <th class="text-uppercase">{{ currencySymbol }} Rate</th>
+                        <th class="text-uppercase">Rate UoM</th>
+                        <th class="text-uppercase">{{ currencySymbol }} AMOUNT</th>
+                        {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+                            <th class="text-uppercase">ACTIONS</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>{{tableData}}</tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <span class="text-danger text-uppercase"><i class="mr-1 fas fa-fw fa-circle-exclamation"></i>Please assign voucher # and driver to the trip to modify expenses</span>
+{% endif %}

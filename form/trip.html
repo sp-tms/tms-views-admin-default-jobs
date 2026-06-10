@@ -1,1 +1,30 @@
-TRIP
+{% set tabsData =
+    [
+        'details'   :
+        [
+            'tabTitle'          : 'Details',
+            'tabInclude'        : 'jobs/form/trip/details'
+        ],
+        'expenses'   :
+        [
+            'tabTitle'          : 'Expenses',
+            'tabInclude'        : 'jobs/form/trip/expenses'
+        ],
+        'fuel'   :
+        [
+            'tabTitle'          : 'Fuel',
+            'tabInclude'        : 'jobs/form/trip/fuel'
+        ]
+    ]
+%}
+{{adminltetags.useTag('tabs',
+    [
+        'component'                     : component,
+        'componentName'                 : componentName,
+        'componentId'                   : componentId,
+        'sectionId'                     : 'trip',
+        'tabsId'                        : 'tabs',
+        'tabsStyle'                     : 'card-outline-tabs',
+        'tabsData'                      : tabsData
+    ]
+)}}

@@ -1,0 +1,4 @@
+{% if jobVoucher is defined and jobVoucher != '' and jobEmployeeId is defined and jobEmployeeId != '0' %}
+{% else %}
+    <span class="text-danger text-uppercase"><i class="mr-1 fas fa-fw fa-circle-exclamation"></i>Please assign voucher # and driver to the trip to modify fuel</span>
+{% endif %}

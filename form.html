@@ -60,17 +60,27 @@
                             [
                                 'tabTitle'          : 'Trip',
                                 'tabInclude'        : 'jobs/form/trip'
-                            ],
-                            'invoice'   :
+                            ]
+                        ]
+                    %}
+                    {% if job['status'] == 1 %}
+                        {% set tabsData = array_merge(tabsData,
                             [
-                                'tabTitle'          : 'Invoice',
-                                'tabInclude'        : 'jobs/form/invoice'
-                            ],
-                            'payments'   :
-                            [
-                                'tabTitle'          : 'Payments',
-                                'tabInclude'        : 'jobs/form/payments'
-                            ],
+                                'invoice'   :
+                                [
+                                    'tabTitle'          : 'Invoice',
+                                    'tabInclude'        : 'jobs/form/invoice'
+                                ],
+                                'payments'   :
+                                [
+                                    'tabTitle'          : 'Payments',
+                                    'tabInclude'        : 'jobs/form/payments'
+                                ]
+                            ]
+                        ) %}
+                    {% endif %}
+                    {% set tabsData = array_merge(tabsData,
+                        [
                             'documents'   :
                             [
                                 'tabTitle'          : 'Documents',
@@ -82,7 +92,7 @@
                                 'tabInclude'        : 'jobs/form/email'
                             ]
                         ]
-                    %}
+                    ) %}
                     {{adminltetags.useTag('tabs',
                         [
                             'component'                     : component,
@@ -110,9 +120,10 @@
 {% set consigneeAddresses = escaper.js(json_encode(consigneeAddresses, 16)) %}
 {% set uoms = escaper.js(json_encode(uoms, 16)) %}
 {% set charges = escaper.js(json_encode(charges, 16)) %}
+{% set expenses = escaper.js(json_encode(expenses, 16)) %}
 {% set jobDetails = escaper.js(json_encode(job, 16)) %}
 <script>
-/*global paginatedPNotify BazProgress BazContentFields BazHelpers BazContentLoader Pace BazCore dataCollection Swal */
+/*global paginatedPNotify BazProgress BazContentFields BazHelpers BazContentLoader Pace BazCore dataCollection Swal Sortable autoComplete */
 var dataCollectionComponent, dataCollectionSection, dataCollectionSectionForm;
 
 if (!window['dataCollection']['{{componentId}}']) {
@@ -140,6 +151,8 @@ if (!dataCollectionSection['{{componentId}}-{{sectionId}}-form']) {
 if (!dataCollectionSectionForm['vars']) {
     dataCollectionSectionForm['vars'] = { };
 }
+dataCollectionSectionForm['vars']['route'] = { };
+
 if (!dataCollectionSectionForm['funcs']) {
     dataCollectionSectionForm['funcs'] = { };
 }
@@ -148,6 +161,7 @@ dataCollectionSectionForm['vars']['from_company_address'] = JSON.parse('{{consig
 dataCollectionSectionForm['vars']['to_company_address'] = JSON.parse('{{consigneeAddresses}}');
 dataCollectionSectionForm['vars']['uoms'] = JSON.parse('{{uoms}}');
 dataCollectionSectionForm['vars']['charges'] = JSON.parse('{{charges}}');
+dataCollectionSectionForm['vars']['expenses'] = JSON.parse('{{expenses}}');
 dataCollectionSectionForm['vars']['job'] = JSON.parse('{{jobDetails}}');
 
 dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
@@ -222,6 +236,13 @@ dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
                         }
                         delete(dataCollectionSectionForm['vars']['job']['charges'][postData['id']]);
 
+                        var currentCharges = $('#{{componentId}}-{{sectionId}}-charges').val();
+                        currentCharges = currentCharges - 1;
+
+                        if (currentCharges === 0) {
+                            $('#{{componentId}}-{{sectionId}}-charges').val('');
+                        }
+
                         paginatedPNotify('success', {
                             text : response.responseMessage
                         });
@@ -236,57 +257,7 @@ dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
     });
 }
 
-dataCollectionSectionForm['funcs']['resetDownloadButtons'] = function() {
-    $('.removeDocument').off();
-    $('.removeDocument').click(function(e) {
-        e.preventDefault();
-
-        var thisTr = $(this).parents('tr');
-        var color = 'warning';
-        var text = '<span class="text-warning">Remove document from Job?<span>';
-        var signed = false;
-        if (dataCollectionSectionForm['vars']['job']['invoice']['signed_uuid'] === $(thisTr)[0].id) {
-            text = '<span class="text-danger">Document is signed and used by invoice. Remove document from Job?<span>';
-            color = 'danger';
-            signed = true;
-        }
-
-        Swal.fire({
-            html                        : text,
-            icon                        : 'question',
-            background                  : 'rgba(0,0,0,.8)',
-            backdrop                    : 'rgba(0,0,0,.6)',
-            buttonsStyling              : false,
-            confirmButtonText           : 'Remove',
-            customClass                 : {
-                'confirmButton'             : 'btn btn-' + color + ' text-uppercase',
-                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
-            },
-            showCancelButton            : true,
-            keydownListenerCapture      : true,
-            allowOutsideClick           : true,
-            allowEscapeKey              : true,
-            didOpen                     : function() {
-                window['dataCollection'].env.sounds.swalSound.play();
-            }
-        }).then((result) => {
-            if (result.value) {
-                if (signed) {
-                    $('#{{componentId}}-{{sectionId}}-signed_uuid').val(0).trigger('change');
-                    $('#{{componentId}}-{{sectionId}}-signed_document').val('');
-                    $('#{{componentId}}-{{sectionId}}-signed_by').val('');
-                    $('#{{componentId}}-{{sectionId}}-signed_at').val('');
-                }
-
-                delete(dataCollectionSectionForm['vars']['job']['documents'][thisTr[0].id]);
-
-                dataCollectionSectionForm['funcs']['updateDocuments'](signed);
-            }
-        });
-    });
-}
-
-dataCollectionSectionForm['funcs']['resetForm'] = function() {
+dataCollectionSectionForm['funcs']['resetChargesForm'] = function() {
     $('#{{componentId}}-{{sectionId}}-charge_id').val('');
     $('#{{componentId}}-{{sectionId}}-charges_list').val(0).trigger('change');
     $('#{{componentId}}-{{sectionId}}-qty').val('');
@@ -315,7 +286,7 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
         var thisId = $(this)[0].id;
 
         if (thisId === '{{componentId}}-{{sectionId}}-charges-cancel') {
-            dataCollectionSectionForm['funcs']['resetForm']();
+            dataCollectionSectionForm['funcs']['resetChargesForm']();
         }
 
         if (thisId === '{{componentId}}-{{sectionId}}-charges-add' ||
@@ -334,15 +305,30 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
                 url = '{{links.url("jobs/updateJobsCharge")}}';
             }
 
+            postData['id'] = $('#{{componentId}}-{{sectionId}}-charge_id').val();
             postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+            postData['charge_id'] = $('#{{componentId}}-{{sectionId}}-charges_list').val();
+            var select2Charges = $('#{{componentId}}-{{sectionId}}-charges_list').select2('data');
+            if (select2Charges[0] && select2Charges[0].newTag) {
+                postData['charge_id'] = select2Charges[0]['text'];
+                postData['charge_id_new'] = true;
+            }
+            postData['visibility'] = $('#{{componentId}}-{{sectionId}}-visibility').val();
             postData['quantity'] = $('#{{componentId}}-{{sectionId}}-qty').val();
             postData['quantity_uom_id'] = $('#{{componentId}}-{{sectionId}}-qty_uom').val();
+            var select2Qty = $('#{{componentId}}-{{sectionId}}-qty_uom').select2('data');
+            if (select2Qty[0] && select2Qty[0].newTag) {
+                postData['quantity_uom_id'] = select2Qty[0]['text'];
+                postData['quantity_uom_id_new'] = true;
+            }
             postData['rate'] = $('#{{componentId}}-{{sectionId}}-rate').val();
             postData['rate_uom_id'] = $('#{{componentId}}-{{sectionId}}-rate_uom').val();
+            var select2Rate = $('#{{componentId}}-{{sectionId}}-rate_uom').select2('data');
+            if (select2Rate[0] && select2Rate[0].newTag) {
+                postData['rate_uom_id'] = select2Rate[0]['text'];
+                postData['rate_uom_id_new'] = true;
+            }
             postData['amount'] = $('#{{componentId}}-{{sectionId}}-amount').val();
-            postData['visibility'] = $('#{{componentId}}-{{sectionId}}-visibility').val();
-            postData['id'] = $('#{{componentId}}-{{sectionId}}-charge_id').val();
-            postData['charge_id'] = $('#{{componentId}}-{{sectionId}}-charges_list').val();
 
             if (postData['charge_id'] == 0) {
                 paginatedPNotify('error', {text : 'Please select charge!'});
@@ -350,6 +336,14 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
             }
             if (postData['visibility'] == 0) {
                 paginatedPNotify('error', {text : 'Please select visibility!'});
+                return;
+            }
+            if (postData['quantity'] === '' || postData['quantity'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct quantity!'});
+                return;
+            }
+            if (postData['rate'] === '' || postData['rate'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct rate!'});
                 return;
             }
             if (postData['amount'] === '' || postData['amount'] == '0') {
@@ -372,15 +366,68 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
                     var chargeRow = { };
                     // Remove Invoice TR, not needed after we create print!
                     var invoiceTr = '';
+                    var currentCharges = $('#{{componentId}}-{{sectionId}}-charges').val();
 
                     if (response.responseData.newCharge) {
                         newCharge = true;
                         charge = response.responseData.newCharge;
+                        currentCharges = currentCharges + 1;
+                        $('#{{componentId}}-{{sectionId}}-charges').val(currentCharges);
+                        $('#{{componentId}}-{{sectionId}}-charges').valid();
                     } else if (response.responseData.updatedCharge) {
                         charge = response.responseData.updatedCharge;
                     }
 
-                    chargeRow['charge_id'] = dataCollectionSectionForm['vars']['charges'][charge['charge_id']]['name'];
+                    if (response.responseData.charges) {
+                        dataCollectionSectionForm['vars']['charges'] = response.responseData.charges;
+
+                        $('#{{componentId}}-{{sectionId}}-charges_list').empty().trigger('change');
+
+                        for (var chargeNew in response.responseData.charges) {
+                            var chargeNewOption = new Option(
+                                response.responseData.charges[chargeNew]['display_name'],
+                                response.responseData.charges[chargeNew]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-charges_list').append(chargeNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-charges_list').val(0).trigger('change');
+                    }
+
+                    if (response.responseData.uoms) {
+                        dataCollectionSectionForm['vars']['uoms'] = response.responseData.uoms;
+
+                        $('#{{componentId}}-{{sectionId}}-qty_uom').empty().trigger('change');
+                        $('#{{componentId}}-{{sectionId}}-rate_uom').empty().trigger('change');
+
+                        for (var qtyUom in response.responseData.uoms) {
+                            var qtyNewOption = new Option(
+                                response.responseData.uoms[qtyUom]['name'],
+                                response.responseData.uoms[qtyUom]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-qty_uom').append(qtyNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-qty_uom').val(0).trigger('change');
+
+                        for (var rateUom in response.responseData.uoms) {
+                            var rateNewOption = new Option(
+                                response.responseData.uoms[rateUom]['name'],
+                                response.responseData.uoms[rateUom]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-rate_uom').append(rateNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-rate_uom').val(0).trigger('change');
+                    }
+
+                    chargeRow['charge_id'] = dataCollectionSectionForm['vars']['charges'][charge['charge_id']]['display_name'];
                     invoiceTr += '<td>' + chargeRow['charge_id'] + '</td>';
 
                     var visibilityType;
@@ -458,9 +505,8 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
                     }
 
                     dataCollectionSectionForm['funcs']['resetChargesButtons']();
-                    dataCollectionSectionForm['funcs']['resetForm']();
+                    dataCollectionSectionForm['funcs']['resetChargesForm']();
                     dataCollectionSectionForm['vars']['job']['charges'][charge['id']] = charge;
-
 
                     paginatedPNotify('success', {
                         text : response.responseMessage
@@ -474,6 +520,660 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
                 thisButton.children('i').attr('hidden', true);
             }, 'json');
         }
+    });
+}
+
+dataCollectionSectionForm['funcs']['resetExpensesButtons'] = function() {
+    $('.editExpense').off();
+    $('.editExpense').click(function(e) {
+        e.preventDefault();
+
+        dataCollectionSectionForm['funcs']['addUpdateExpenses']();
+
+        var expenseId = $(this).data()['id'];
+
+        $('#{{componentId}}-{{sectionId}}-expense_id').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['id']);
+        $('#{{componentId}}-{{sectionId}}-expenses_list').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['expense_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-mode_of_payment').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['mode_of_payment']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-payment_tx_id').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['payment_tx_id']);
+        $('#{{componentId}}-{{sectionId}}-expense_qty').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['quantity']);
+        $('#{{componentId}}-{{sectionId}}-expense_qty_uom').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['quantity_uom_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-expense_rate').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['rate']);
+        $('#{{componentId}}-{{sectionId}}-expense_rate_uom').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['rate_uom_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-expense_amount').val(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['amount']);
+        dataCollectionSection['{{componentId}}-{{sectionId}}-expense_date']['flatpickr'].setDate(dataCollectionSectionForm['vars']['job']['expenses'][expenseId]['expense_date']);
+
+        $('#{{componentId}}-{{sectionId}}-expenses-add').attr('hidden', true);
+        $('#{{componentId}}-{{sectionId}}-expenses-update').attr('hidden', false);
+        $('#{{componentId}}-{{sectionId}}-expenses-update').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-mode_of_payment').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-payment_tx_id').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_qty').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_qty_uom').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_rate').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_rate_uom').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_amount').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-expense_date').attr('disabled', false);
+    });
+
+    $('.removeExpense').off();
+    $('.removeExpense').click(function(e) {
+        e.preventDefault();
+
+        var thisTr = $(this).parents('tr');
+
+        Swal.fire({
+            html                        : '<span class="text-danger">Remove Expense from Voucher?<span>',
+            icon                        : 'question',
+            background                  : 'rgba(0,0,0,.8)',
+            backdrop                    : 'rgba(0,0,0,.6)',
+            buttonsStyling              : false,
+            confirmButtonText           : 'Remove',
+            customClass                 : {
+                'confirmButton'             : 'btn btn-danger text-uppercase',
+                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+            },
+            showCancelButton            : true,
+            keydownListenerCapture      : true,
+            allowOutsideClick           : true,
+            allowEscapeKey              : true,
+            didOpen                     : function() {
+                window['dataCollection'].env.sounds.swalSound.play();
+            }
+        }).then((result) => {
+            if (result.value) {
+                var postData = { };
+                postData[$('#security-token').attr('name')] = $('#security-token').val();
+                postData['id'] = $(this).data('id');
+
+                $.post('{{links.url("jobs/removeJobsExpense")}}', postData, function(response) {
+                    if (response.tokenKey && response.token) {
+                        $("#security-token").attr("name", response.tokenKey);
+                        $("#security-token").val(response.token);
+                    }
+
+                    if (response.responseCode === 0) {
+                        dataCollectionSectionForm['vars']['expensesTable'].row(thisTr).remove().draw();
+                        delete(dataCollectionSectionForm['vars']['job']['expenses'][postData['id']]);
+
+                        var currentExpenses = $('#{{componentId}}-{{sectionId}}-expenses').val();
+                        currentExpenses = currentExpenses - 1;
+
+                        if (currentExpenses === 0) {
+                            $('#{{componentId}}-{{sectionId}}-expenses').val('');
+                        }
+
+                        paginatedPNotify('success', {
+                            text : response.responseMessage
+                        });
+
+                        dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+                    } else if (response.responseCode === 1) {
+                        paginatedPNotify('error', {
+                            text : response.responseMessage
+                        });
+                    }
+                }, 'json');
+            }
+        });
+    });
+}
+
+dataCollectionSectionForm['funcs']['resetExpensesForm'] = function() {
+    $('#{{componentId}}-{{sectionId}}-expense_id').val('');
+    $('#{{componentId}}-{{sectionId}}-expenses_list').val(0).trigger('change');
+    dataCollectionSection['{{componentId}}-{{sectionId}}-expense_date']['flatpickr'].setDate('today');
+    $('#{{componentId}}-{{sectionId}}-mode_of_payment').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-payment_tx_id').val('');
+    $('#{{componentId}}-{{sectionId}}-expense_qty').val('');
+    $('#{{componentId}}-{{sectionId}}-expense_qty_uom').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-expense_rate').val('');
+    $('#{{componentId}}-{{sectionId}}-expense_rate_uom').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-expense_amount').val('');
+    $('#{{componentId}}-{{sectionId}}-expenses-add').attr('hidden', false);
+    $('#{{componentId}}-{{sectionId}}-expenses-add').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expenses-update').attr('hidden', true);
+    $('#{{componentId}}-{{sectionId}}-expenses-update').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-mode_of_payment').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-payment_tx_id').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expense_qty').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expense_qty_uom').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expense_rate').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expense_rate_uom').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-expense_amount').attr('disabled', true);
+}
+
+dataCollectionSectionForm['funcs']['updateCounters'] = function(type) {
+    if (type === 'expenses') {
+        var rows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
+        var noOfExpenses = rows.length;
+        var totalExpenses = 0;
+
+        if (noOfExpenses > 0) {
+            $(rows).each(function(index, row) {
+                if (parseInt(row.amount) > 0) {
+                    totalExpenses += parseInt(row.amount);
+                }
+            });
+        }
+
+        $('#{{componentId}}-{{sectionId}}-queue-no_of_expenses .badge').html(noOfExpenses);
+        $('#{{componentId}}-{{sectionId}}-queue-total_expenses_amount .badge').html("{{currencySymbol}} " + totalExpenses);
+    } else if (type === 'fuel') {
+        //
+    }
+}
+
+dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
+    $('#{{componentId}}-{{sectionId}}-expenses-add, #{{componentId}}-{{sectionId}}-expenses-update, #{{componentId}}-{{sectionId}}-expenses-cancel').off();
+    $('#{{componentId}}-{{sectionId}}-expenses-add, #{{componentId}}-{{sectionId}}-expenses-update, #{{componentId}}-{{sectionId}}-expenses-cancel').click(function(e) {
+        e.preventDefault();
+
+        var thisId = $(this)[0].id;
+
+        if (thisId === '{{componentId}}-{{sectionId}}-expenses-cancel') {
+            dataCollectionSectionForm['funcs']['resetExpensesForm']();
+        }
+
+        if (thisId === '{{componentId}}-{{sectionId}}-expenses-add' ||
+            thisId === '{{componentId}}-{{sectionId}}-expenses-update'
+        ) {
+            var thisButton = $(this);
+
+            var url;
+            var postData = { };
+            postData[$('#security-token').attr('name')] = $('#security-token').val();
+
+            if (thisId === '{{componentId}}-{{sectionId}}-expenses-add') {
+                url = '{{links.url("jobs/addJobsExpense")}}';
+            }
+            if (thisId === '{{componentId}}-{{sectionId}}-expenses-update') {
+                url = '{{links.url("jobs/updateJobsExpense")}}';
+            }
+
+            postData['id'] = $('#{{componentId}}-{{sectionId}}-expense_id').val();
+            postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+            postData['voucher_no'] = $('#{{componentId}}-{{sectionId}}-voucher_no').val();
+            postData['employee_id'] = $('#{{componentId}}-{{sectionId}}-employee_id').val();
+            postData['expense_id'] = $('#{{componentId}}-{{sectionId}}-expenses_list').val();
+            var select2Expenses = $('#{{componentId}}-{{sectionId}}-expenses_list').select2('data');
+            if (select2Expenses[0] && select2Expenses[0].newTag) {
+                postData['expense_id'] = select2Expenses[0]['text'];
+                postData['expense_id_new'] = true;
+            }
+            postData['expense_date'] = $('#{{componentId}}-{{sectionId}}-expense_date').val();
+            postData['mode_of_payment'] = $('#{{componentId}}-{{sectionId}}-mode_of_payment').val();
+            postData['payment_tx_id'] = $('#{{componentId}}-{{sectionId}}-payment_tx_id').val();
+            postData['quantity'] = $('#{{componentId}}-{{sectionId}}-expense_qty').val();
+            postData['quantity_uom_id'] = $('#{{componentId}}-{{sectionId}}-expense_qty_uom').val();
+            var select2ExpensesQty = $('#{{componentId}}-{{sectionId}}-expense_qty_uom').select2('data');
+            if (select2ExpensesQty[0] && select2ExpensesQty[0].newTag) {
+                postData['quantity_uom_id'] = select2ExpensesQty[0]['text'];
+                postData['quantity_uom_id_new'] = true;
+            }
+            postData['rate'] = $('#{{componentId}}-{{sectionId}}-expense_rate').val();
+            postData['rate_uom_id'] = $('#{{componentId}}-{{sectionId}}-expense_rate_uom').val();
+            var select2ExpensesRate = $('#{{componentId}}-{{sectionId}}-expense_rate_uom').select2('data');
+            if (select2ExpensesRate[0] && select2ExpensesRate[0].newTag) {
+                postData['rate_uom_id'] = select2ExpensesRate[0]['text'];
+                postData['rate_uom_id_new'] = true;
+            }
+            postData['amount'] = $('#{{componentId}}-{{sectionId}}-expense_amount').val();
+
+            if (postData['voucher_no'] === '' || postData['voucher_no'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter voucher #'});
+                return;
+            }
+            if (postData['employee_id'] === '' || postData['employee_id'] == 0) {
+                paginatedPNotify('error', {text : 'Please select employee!'});
+                return;
+            }
+            if (postData['expense_id'] === '' || postData['expense_id'] == 0) {
+                paginatedPNotify('error', {text : 'Please select expense!'});
+                return;
+            }
+            if (!postData['mode_of_payment'] || postData['mode_of_payment'] === '' || postData['mode_of_payment'] == 0) {
+                paginatedPNotify('error', {text : 'Please select mode of payment!'});
+                return;
+            }
+            if (postData['quantity'] === '' || postData['quantity'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct quantity!'});
+                return;
+            }
+            if (postData['rate'] === '' || postData['rate'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct rate!'});
+                return;
+            }
+            if (postData['amount'] === '' || postData['amount'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct amount!'});
+                return;
+            }
+
+            // $(this).attr('disabled', true);
+            // $(this).children('i').attr('hidden', false);
+
+            $.post(url, postData, function(response) {
+                if (response.tokenKey && response.token) {
+                    $("#security-token").attr("name", response.tokenKey);
+                    $("#security-token").val(response.token);
+                }
+
+                if (response.responseCode === 0) {
+                    var expense = { };
+                    var newExpense = false;
+                    var expenseRow = { };
+
+                    var currentExpenses = $('#{{componentId}}-{{sectionId}}-expenses').val();
+
+                    if (response.responseData.newExpense) {
+                        newExpense = true;
+                        expense = response.responseData.newExpense;
+                        currentExpenses = currentExpenses + 1;
+                        $('#{{componentId}}-{{sectionId}}-expenses').val(currentExpenses);
+                        $('#{{componentId}}-{{sectionId}}-expenses').valid();
+                    } else if (response.responseData.updatedExpense) {
+                        expense = response.responseData.updatedExpense;
+                    }
+
+                    if (response.responseData.expenses) {
+                        dataCollectionSectionForm['vars']['expenses'] = response.responseData.expenses;
+
+                        $('#{{componentId}}-{{sectionId}}-expenses_list').empty().trigger('change');
+
+                        for (var expenseNew in response.responseData.expenses) {
+                            var expenseNewOption = new Option(
+                                response.responseData.expenses[expenseNew]['display_name'],
+                                response.responseData.expenses[expenseNew]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-expenses_list').append(expenseNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-expenses_list').val(0).trigger('change');
+                    }
+
+                    if (response.responseData.uoms) {
+                        dataCollectionSectionForm['vars']['uoms'] = response.responseData.uoms;
+
+                        $('#{{componentId}}-{{sectionId}}-qty_uom').empty().trigger('change');
+                        $('#{{componentId}}-{{sectionId}}-rate_uom').empty().trigger('change');
+
+                        for (var qtyUom in response.responseData.uoms) {
+                            var qtyNewOption = new Option(
+                                response.responseData.uoms[qtyUom]['name'],
+                                response.responseData.uoms[qtyUom]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-qty_uom').append(qtyNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-qty_uom').val(0).trigger('change');
+
+                        for (var rateUom in response.responseData.uoms) {
+                            var rateNewOption = new Option(
+                                response.responseData.uoms[rateUom]['name'],
+                                response.responseData.uoms[rateUom]['id'],
+                                false,
+                                false
+                            );
+
+                            $('#{{componentId}}-{{sectionId}}-rate_uom').append(rateNewOption).trigger('change');
+                        }
+                        $('#{{componentId}}-{{sectionId}}-rate_uom').val(0).trigger('change');
+                    }
+
+                    expenseRow['expense_id'] = dataCollectionSectionForm['vars']['expenses'][expense['expense_id']]['display_name'];
+
+                    if (expense['carry_forward']) {
+                        expenseRow['cf'] = 'Y';
+                    } else {
+                        expenseRow['cf'] = 'N';
+                    }
+
+                    if (expense['expense_date'] && expense['expense_date'] !== '') {
+                        expenseRow['expense_date'] = expense['expense_date'];
+                    } else {
+                        expenseRow['expense_date'] = '-';
+                    }
+
+                    if (expense['mode_of_payment'] && expense['mode_of_payment'] !== '') {
+                        if (expense['mode_of_payment'] == '1') {
+                            expenseRow['mop'] = 'CASH';
+                        } else if (expense['mode_of_payment'] == '2') {
+                            expenseRow['mop'] = 'ONLINE';
+                        } else {
+                            expenseRow['mop'] = '-';
+                        }
+                    } else {
+                        expenseRow['mop'] = '-';
+                    }
+
+                    if (expense['quantity'] && expense['quantity'] != '0') {
+                        expenseRow['qty'] = expense['quantity'];
+                    } else {
+                        expenseRow['qty'] = '-';
+                    }
+
+                    if (expense['quantity_uom_id'] && expense['quantity_uom_id'] != '0') {
+                        expenseRow['qty_uom_id'] = dataCollectionSectionForm['vars']['uoms'][expense['quantity_uom_id']]['name'];
+                    } else {
+                        expenseRow['qty_uom_id'] = '-';
+                    }
+
+                    if (expense['rate'] && expense['rate'] != '0') {
+                        expenseRow['rate'] = expense['rate'];
+                    } else {
+                        expenseRow['rate'] = '-';
+                    }
+
+                    if (expense['rate_uom_id'] && expense['rate_uom_id'] != '0') {
+                        expenseRow['rate_uom_id'] = dataCollectionSectionForm['vars']['uoms'][expense['rate_uom_id']]['name'];
+                    } else {
+                        expenseRow['rate_uom_id'] = '-';
+                    }
+
+                    expenseRow['amount'] = expense['amount'];
+
+                    expenseRow['actions'] =
+                        '<button class="btn btn-xs btn-warning mr-1 editExpense text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-edit-' + expense['id'] +
+                        '" data-id="' + expense['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-edit"></i></button>' +
+                        '<button class="btn btn-xs btn-danger mr-1 removeExpense text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-remove-' + expense['id'] +
+                        '" data-id="' + expense['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-trash"></i> </button>';
+                    expenseRow['DT_RowId'] = expense['id'];
+
+                    if (newExpense) {
+                        dataCollectionSectionForm['vars']['expensesTable'].row.add(expenseRow).draw();
+                    } else {
+                        for (var row in dataCollectionSectionForm['vars']['expensesTable'].rows().data()) {
+                            if (dataCollectionSectionForm['vars']['expensesTable'].rows().data()[row]['DT_RowId'] == expense['id']) {
+                                dataCollectionSectionForm['vars']['expensesTable'].row(row).data(expenseRow).draw();
+
+                                break;
+                            }
+                        }
+                    }
+
+                    dataCollectionSectionForm['funcs']['resetExpensesButtons']();
+                    dataCollectionSectionForm['funcs']['resetExpensesForm']();
+                    dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+                    dataCollectionSectionForm['vars']['job']['expenses'][expense['id']] = expense;
+
+                    paginatedPNotify('success', {
+                        text : response.responseMessage
+                    });
+                } else if (response.responseCode === 1) {
+                    paginatedPNotify('error', {
+                        text : response.responseMessage
+                    });
+                }
+                thisButton.attr('disabled', false);
+                thisButton.children('i').attr('hidden', true);
+            }, 'json');
+        }
+    });
+}
+
+dataCollectionSectionForm['funcs']['getNextVoucher'] = function() {
+    var postData = { };
+    postData[$('#security-token').attr('name')] = $('#security-token').val();
+    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
+
+    $.post('{{links.url("jobs/getNextVoucherNumber")}}', postData, function(response) {
+        if (response.responseCode == 0) {
+            paginatedPNotify('success', response.responseMessage);
+
+            if (response.responseData.nextVoucherNumber) {
+                $('#{{componentId}}-{{sectionId}}-voucher_no').val(response.responseData.nextVoucherNumber);
+            }
+        } else {
+            paginatedPNotify('error', response.responseMessage);
+        }
+
+        if (response.tokenKey && response.token) {
+            $("#security-token").attr("name", response.tokenKey);
+            $("#security-token").val(response.token);
+        }
+    }, 'json');
+}
+
+dataCollectionSectionForm['funcs']['changeVoucherOrEmployee'] = function(voucher = false, previousEmployeeId = null) {
+    Swal.fire({
+        html                        : '<span class="text-danger">Voucher has expenses attached, change voucher #?<br>Changing voucher # or driver will attach all expenses to the new voucher # or driver.<span>',
+        icon                        : 'question',
+        background                  : 'rgba(0,0,0,.8)',
+        backdrop                    : 'rgba(0,0,0,.6)',
+        buttonsStyling              : false,
+        confirmButtonText           : 'Proceed',
+        customClass                 : {
+            'confirmButton'             : 'btn btn-danger text-uppercase',
+            'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+        },
+        showCancelButton            : true,
+        keydownListenerCapture      : true,
+        allowOutsideClick           : true,
+        allowEscapeKey              : true,
+        didOpen                     : function() {
+            window['dataCollection'].env.sounds.swalSound.play();
+        }
+    }).then((result) => {
+        if (result.value) {
+            if (voucher) {
+                dataCollectionSectionForm['funcs']['getNextVoucher']();
+            }
+
+            //Mark update for all expenses.
+            dataCollectionSection["dataToSubmit"]["update_all_expenses"] = true;
+
+            $('#{{componentId}}-trip-tabs-expenses')
+                .empty()
+                .html('<span class="text-danger text-uppercase"><i class="mr-1 fas fa-fw fa-circle-exclamation"></i>Voucher # or driver changed! Please update Lorry Receipt to proceed.</span>');
+            $('#{{componentId}}-trip-tabs-fuel')
+                .empty()
+                .html('<span class="text-danger text-uppercase"><i class="mr-1 fas fa-fw fa-circle-exclamation"></i>Voucher # or driver changed! Please update Lorry Receipt to proceed.</span>');
+        } else {
+            if (previousEmployeeId) {
+                $('#{{componentId}}-{{sectionId}}-employee_id').val(previousEmployeeId).trigger('change');
+            }
+        }
+    });
+}
+
+dataCollectionSectionForm['funcs']['checkCarryForwardedExpenses'] = function(employee) {
+    var postData = { };
+    postData[$('#security-token').attr('name')] = $('#security-token').val();
+    postData['employee_id'] = employee.id;
+
+    $.post('{{links.url("jobs/checkCarryForwardedExpenses")}}', postData, function(response) {
+        if (response.responseCode == 0) {
+            if (response.responseData.carryForwardedExpenses && response.responseData.lorryReceipts) {
+                Swal.fire({
+                    html                        : '<span class="text-info">Employee ' + employee.text + ' has ' + Object.keys(response.responseData.carryForwardedExpenses).length +
+                    ' expenses from previous Lorry receipt(s): ' + response.responseData.lorryReceipts.join(',') + '. Do you want to import them to this Lorry receipt?<span>',
+                    icon                        : 'info',
+                    background                  : 'rgba(0,0,0,.8)',
+                    backdrop                    : 'rgba(0,0,0,.6)',
+                    buttonsStyling              : false,
+                    confirmButtonText           : 'Import',
+                    customClass                 : {
+                        'confirmButton'             : 'btn btn-primary text-uppercase',
+                        'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+                    },
+                    showCancelButton            : true,
+                    keydownListenerCapture      : true,
+                    allowOutsideClick           : true,
+                    allowEscapeKey              : true,
+                    didOpen                     : function() {
+                        window['dataCollection'].env.sounds.swalSound.play();
+                    }
+                }).then((result) => {
+                    if (result.value) {
+                        dataCollectionSectionForm['vars']['job']['expenses'] = response.responseData.carryForwardedExpenses;
+
+                        for (var expense in dataCollectionSectionForm['vars']['job']['expenses']) {
+                            var expenseRow = { };
+
+                            expenseRow['expense_id'] =
+                                dataCollectionSectionForm['vars']['expenses'][dataCollectionSectionForm['vars']['job']['expenses'][expense]['expense_id']]['display_name'];
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['carry_forward']) {
+                                expenseRow['cf'] = 'Y';
+                            } else {
+                                expenseRow['cf'] = 'N';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['expense_date'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['expense_date'] !== ''
+                            ) {
+                                expenseRow['expense_date'] = dataCollectionSectionForm['vars']['job']['expenses'][expense]['expense_date'];
+                            } else {
+                                expenseRow['expense_date'] = '-';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['mode_of_payment'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['mode_of_payment'] !== ''
+                            ) {
+                                if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['mode_of_payment'] == '1') {
+                                    expenseRow['mop'] = 'CASH';
+                                } else if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['mode_of_payment'] == '2') {
+                                    expenseRow['mop'] = 'ONLINE';
+                                } else {
+                                    expenseRow['mop'] = '-';
+                                }
+                            } else {
+                                expenseRow['mop'] = '-';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity'] != '0'
+                            ) {
+                                expenseRow['qty'] = dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity'];
+                            } else {
+                                expenseRow['qty'] = '-';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity_uom_id'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity_uom_id'] != '0'
+                            ) {
+                                expenseRow['qty_uom_id'] =
+                                    dataCollectionSectionForm['vars']['uoms'][dataCollectionSectionForm['vars']['job']['expenses'][expense]['quantity_uom_id']]['name'];
+                            } else {
+                                expenseRow['qty_uom_id'] = '-';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate'] != '0'
+                            ) {
+                                expenseRow['rate'] = dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate'];
+                            } else {
+                                expenseRow['rate'] = '-';
+                            }
+
+                            if (dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate_uom_id'] &&
+                                dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate_uom_id'] != '0'
+                            ) {
+                                expenseRow['rate_uom_id'] =
+                                    dataCollectionSectionForm['vars']['uoms'][dataCollectionSectionForm['vars']['job']['expenses'][expense]['rate_uom_id']]['name'];
+                            } else {
+                                expenseRow['rate_uom_id'] = '-';
+                            }
+
+                            expenseRow['amount'] = dataCollectionSectionForm['vars']['job']['expenses'][expense]['amount'];
+
+                            expenseRow['actions'] =
+                                '<button class="btn btn-xs btn-warning mr-1 editExpense text-white" ' +
+                                'id="{{componentId}}-{{sectionId}}-edit-' + dataCollectionSectionForm['vars']['job']['expenses'][expense]['id'] +
+                                '" data-id="' + dataCollectionSectionForm['vars']['job']['expenses'][expense]['id'] +
+                                '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                                ' data-original-title=""><i class="fas fa-fw fa-edit"></i></button>' +
+                                '<button class="btn btn-xs btn-danger mr-1 removeExpense text-white" ' +
+                                'id="{{componentId}}-{{sectionId}}-remove-' + dataCollectionSectionForm['vars']['job']['expenses'][expense]['id'] +
+                                '" data-id="' + dataCollectionSectionForm['vars']['job']['expenses'][expense]['id'] +
+                                '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                                ' data-original-title=""><i class="fas fa-fw fa-trash"></i> </button>';
+                            expenseRow['DT_RowId'] = dataCollectionSectionForm['vars']['job']['expenses'][expense]['id'];
+
+                            dataCollectionSectionForm['vars']['expensesTable'].row.add(expenseRow).draw();
+                        }
+
+                        dataCollectionSectionForm['funcs']['resetExpensesButtons']();
+                        dataCollectionSectionForm['funcs']['resetExpensesForm']();
+                        dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+
+                        paginatedPNotify('success', {
+                            text : response.responseMessage
+                        });
+
+                        //Mark update for all expenses.
+                        dataCollectionSection["dataToSubmit"]["update_all_expenses"] = true;
+                    }
+                });
+            }
+        } else {
+            paginatedPNotify('error', response.responseMessage);
+        }
+
+        if (response.tokenKey && response.token) {
+            $("#security-token").attr("name", response.tokenKey);
+            $("#security-token").val(response.token);
+        }
+    }, 'json');
+}
+
+dataCollectionSectionForm['funcs']['resetDownloadButtons'] = function() {
+    $('.removeDocument').off();
+    $('.removeDocument').click(function(e) {
+        e.preventDefault();
+
+        var thisTr = $(this).parents('tr');
+        var color = 'warning';
+        var text = '<span class="text-warning">Remove document from Job?<span>';
+        var signed = false;
+        if (dataCollectionSectionForm['vars']['job']['invoice']['signed_uuid'] === $(thisTr)[0].id) {
+            text = '<span class="text-danger">Document is signed and used by invoice. Remove document from Job?<span>';
+            color = 'danger';
+            signed = true;
+        }
+
+        Swal.fire({
+            html                        : text,
+            icon                        : 'question',
+            background                  : 'rgba(0,0,0,.8)',
+            backdrop                    : 'rgba(0,0,0,.6)',
+            buttonsStyling              : false,
+            confirmButtonText           : 'Remove',
+            customClass                 : {
+                'confirmButton'             : 'btn btn-' + color + ' text-uppercase',
+                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+            },
+            showCancelButton            : true,
+            keydownListenerCapture      : true,
+            allowOutsideClick           : true,
+            allowEscapeKey              : true,
+            didOpen                     : function() {
+                window['dataCollection'].env.sounds.swalSound.play();
+            }
+        }).then((result) => {
+            if (result.value) {
+                if (signed) {
+                    $('#{{componentId}}-{{sectionId}}-signed_uuid').val(0).trigger('change');
+                    $('#{{componentId}}-{{sectionId}}-signed_document').val('');
+                    $('#{{componentId}}-{{sectionId}}-signed_by').val('');
+                    $('#{{componentId}}-{{sectionId}}-signed_at').val('');
+                }
+
+                delete(dataCollectionSectionForm['vars']['job']['documents'][thisTr[0].id]);
+
+                dataCollectionSectionForm['funcs']['updateDocuments'](signed);
+            }
+        });
     });
 }
 
@@ -606,15 +1306,21 @@ dataCollectionSectionForm['funcs']['getCompany'] = function(companyId, destinati
 dataCollectionSection =
     $.extend(dataCollectionSection, {
         '{{componentId}}-{{sectionId}}-id'                          : { },
-        '{{componentId}}-{{sectionId}}-lr'                          : {
+        '{{componentId}}-{{sectionId}}-lr_no'                       : {
             afterInit: function() {
                 $('#{{componentId}}-{{sectionId}}-check-lr').click(function(e) {
                     e.preventDefault();
 
                     var postData = { };
                     postData[$('#security-token').attr('name')] = $('#security-token').val();
-                    postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-lr').val();
+                    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
+                    postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-lr_no').val();
 
+                    if (postData['financial_year'] === '') {
+                        paginatedPNotify('error', 'Please enter financial year in yy-yy format');
+
+                        return false;
+                    }
                     if (postData['lr_no'] === '') {
                         paginatedPNotify('error', 'Please enter Lorry Receipt #');
 
@@ -624,6 +1330,36 @@ dataCollectionSection =
                     $.post('{{links.url("jobs/checkLr")}}', postData, function(response) {
                         if (response.responseCode == 0) {
                             paginatedPNotify('success', response.responseMessage);
+                        } else if (response.responseCode == 2 && response.responseData.newLr) {
+                            var title = '<span class="text-warning">Lorry Receipt # ' + postData['lr_no'] +
+                                        ' is valid. But, the next Lorry Receipt # as per system should be ' + response.responseData.newLr.lr_no +
+                                        '. Which Lorry Receipt # do you want to use?<span>';
+                            Swal.fire({
+                                html                        : title,
+                                icon                        : 'warning',
+                                background                  : 'rgba(0,0,0,.8)',
+                                backdrop                    : 'rgba(0,0,0,.6)',
+                                buttonsStyling              : false,
+                                confirmButtonText           : 'Use ' + response.responseData.newLr.lr_no,
+                                cancelButtonText            : 'Use ' + postData['lr_no'],
+                                customClass                 : {
+                                    'confirmButton'             : 'btn btn-primary text-uppercase',
+                                    'cancelButton'              : 'ml-2 btn btn-warning text-uppercase',
+                                },
+                                showCancelButton            : true,
+                                keydownListenerCapture      : true,
+                                allowOutsideClick           : true,
+                                allowEscapeKey              : true,
+                                didOpen                     : function() {
+                                    window['dataCollection'].env.sounds.swalSound.play();
+                                }
+                            }).then((result) => {
+                                if (result.value) {
+                                    $('#{{componentId}}-{{sectionId}}-lr_no').val(response.responseData.newLr.lr_no);
+                                }
+
+                                $('#{{componentId}}-{{sectionId}}-lr_no').attr('disabled', true);
+                            })
                         } else {
                             paginatedPNotify('error', response.responseMessage);
                         }
@@ -640,13 +1376,26 @@ dataCollectionSection =
 
                     var postData = { };
                     postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
 
                     $.post('{{links.url("jobs/getNextLr")}}', postData, function(response) {
                         if (response.responseCode == 0) {
                             paginatedPNotify('success', response.responseMessage);
 
                             if (response.responseData.newLr.lr_no) {
-                                $('#{{componentId}}-{{sectionId}}-lr').val(response.responseData.newLr.lr_no);
+                                $('#{{componentId}}-{{sectionId}}-lr_no').val(response.responseData.newLr.lr_no);
+                                $('#{{componentId}}-{{sectionId}}-lr_no').attr('disabled', true);
+                            }
+                            if (response.responseData.newLr.financial_year) {
+                                if ($('#{{componentId}}-{{sectionId}}-financial_year').val() === '') {
+                                    $('#{{componentId}}-{{sectionId}}-financial_year').val(response.responseData.newLr.financial_year);
+                                }
+                                $('#{{componentId}}-{{sectionId}}-financial_year').attr('disabled', true);
+                            }
+                            if (response.responseData.newLr.date) {
+                                if ($('#{{componentId}}-{{sectionId}}-date').val() === '') {
+                                    dataCollectionSection['{{componentId}}-{{sectionId}}-date']['flatpickr'].setDate(response.responseData.newLr.date);
+                                }
                             }
                         } else {
                             paginatedPNotify('error', response.responseMessage);
@@ -672,8 +1421,9 @@ dataCollectionSection =
                         if (response.responseCode == 0) {
                             paginatedPNotify('success', response.responseMessage);
 
-                            if (response.responseData.newLr.financial_year) {
-                                $('#{{componentId}}-{{sectionId}}-financial_year').val(response.responseData.newLr.financial_year);
+                            if (response.responseData.financialYear) {
+                                $('#{{componentId}}-{{sectionId}}-financial_year').val(response.responseData.financialYear);
+                                $('#{{componentId}}-{{sectionId}}-financial_year').attr('disabled', true);
                             }
                         } else {
                             paginatedPNotify('error', response.responseMessage);
@@ -709,6 +1459,8 @@ dataCollectionSection =
                 $('#{{componentId}}-{{sectionId}}-company_id').on('select2:select', function(e) {
                     $('#{{componentId}}-{{sectionId}}-from_company_id').val(e.params.data.id).trigger('change');
                     $('#{{componentId}}-{{sectionId}}-to_company_id').val(e.params.data.id).trigger('change');
+                    $('#{{componentId}}-{{sectionId}}-from_company_id').valid();
+                    $('#{{componentId}}-{{sectionId}}-to_company_id').valid();
                     dataCollectionSectionForm['funcs']['getCompany'](e.params.data.id, ['from','to']);
                 });
             }
@@ -885,6 +1637,8 @@ dataCollectionSection =
         '{{componentId}}-{{sectionId}}-amount'                      : { },
         '{{componentId}}-{{sectionId}}-charges'                     : {
             afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-charges').attr('hidden', true);
+
                 if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-charges-table')) {
                     var columns =
                         [
@@ -897,7 +1651,7 @@ dataCollectionSection =
                             {data: 'amount', orderable: false}
                         ];
 
-                    if (dataCollectionSectionForm['vars']['job']['status'] != '1') {
+                    if (dataCollectionSectionForm['vars']['job']['status'] != '4') {
                         columns.push({data: 'actions', orderable: false});
                     }
 
@@ -946,6 +1700,36 @@ dataCollectionSection =
                     $.post('{{links.url("jobs/checkInvoice")}}', postData, function(response) {
                         if (response.responseCode == 0) {
                             paginatedPNotify('success', response.responseMessage);
+                        } else if (response.responseCode == 2 && response.responseData.nextInvoiceNumber) {
+                            var title = '<span class="text-warning">Invoice # ' + postData['invoice_no'] +
+                                        ' is valid. But, the next Invoice # as per system should be ' + response.responseData.nextInvoiceNumber +
+                                        '. Which Invoice # do you want to use?<span>';
+                            Swal.fire({
+                                html                        : title,
+                                icon                        : 'warning',
+                                background                  : 'rgba(0,0,0,.8)',
+                                backdrop                    : 'rgba(0,0,0,.6)',
+                                buttonsStyling              : false,
+                                confirmButtonText           : 'Use ' + response.responseData.nextInvoiceNumber,
+                                cancelButtonText            : 'Use ' + postData['invoice_no'],
+                                customClass                 : {
+                                    'confirmButton'             : 'btn btn-primary text-uppercase',
+                                    'cancelButton'              : 'ml-2 btn btn-warning text-uppercase',
+                                },
+                                showCancelButton            : true,
+                                keydownListenerCapture      : true,
+                                allowOutsideClick           : true,
+                                allowEscapeKey              : true,
+                                didOpen                     : function() {
+                                    window['dataCollection'].env.sounds.swalSound.play();
+                                }
+                            }).then((result) => {
+                                if (result.value) {
+                                    $('#{{componentId}}-{{sectionId}}-invoice_no').val(response.responseData.nextInvoiceNumber);
+                                }
+
+                                $('#{{componentId}}-{{sectionId}}-invoice_no').attr('disabled', true);
+                            })
                         } else {
                             paginatedPNotify('error', response.responseMessage);
                         }
@@ -1189,7 +1973,504 @@ dataCollectionSection =
         '{{componentId}}-{{sectionId}}-email_attachments'           : {
             placeholder : "SELECT FILES TO ATTACH"
         },
+        '{{componentId}}-{{sectionId}}-voucher_no'                  : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-check-voucher').click(function(e) {
+                    e.preventDefault();
+
+                    var postData = { };
+                    postData[$('#security-token').attr('name')] = $('#security-token').val();
+                    postData['financial_year'] = $('#{{componentId}}-{{sectionId}}-financial_year').val();
+                    postData['voucher_no'] = $('#{{componentId}}-{{sectionId}}-voucher_no').val();
+
+                    if (postData['financial_year'] === '') {
+                        paginatedPNotify('error', 'Please enter financial year in yy-yy format');
+
+                        return false;
+                    }
+                    if (postData['voucher_no'] === '') {
+                        paginatedPNotify('error', 'Please enter Voucher #');
+
+                        return false;
+                    }
+
+                    $.post('{{links.url("jobs/checkVoucher")}}', postData, function(response) {
+                        if (response.responseCode == 0) {
+                            paginatedPNotify('success', response.responseMessage);
+                        } else if (response.responseCode == 2 && response.responseData.nextVoucherNumber) {
+                            var title = '<span class="text-warning">Voucher # ' + postData['voucher_no'] +
+                                        ' is valid. But, the next Voucher # as per system should be ' + response.responseData.nextVoucherNumber +
+                                        '. Which Voucher # do you want to use?<span>';
+                            Swal.fire({
+                                html                        : title,
+                                icon                        : 'warning',
+                                background                  : 'rgba(0,0,0,.8)',
+                                backdrop                    : 'rgba(0,0,0,.6)',
+                                buttonsStyling              : false,
+                                confirmButtonText           : 'Use ' + response.responseData.nextVoucherNumber,
+                                cancelButtonText            : 'Use ' + postData['voucher_no'],
+                                customClass                 : {
+                                    'confirmButton'             : 'btn btn-primary text-uppercase',
+                                    'cancelButton'              : 'ml-2 btn btn-warning text-uppercase',
+                                },
+                                showCancelButton            : true,
+                                keydownListenerCapture      : true,
+                                allowOutsideClick           : true,
+                                allowEscapeKey              : true,
+                                didOpen                     : function() {
+                                    window['dataCollection'].env.sounds.swalSound.play();
+                                }
+                            }).then((result) => {
+                                if (result.value) {
+                                    $('#{{componentId}}-{{sectionId}}-voucher_no').val(response.responseData.nextVoucherNumber);
+                                }
+
+                                $('#{{componentId}}-{{sectionId}}-voucher_no').attr('disabled', true);
+                            })
+                        } else {
+                            paginatedPNotify('error', response.responseMessage);
+                        }
+
+                        if (response.tokenKey && response.token) {
+                            $("#security-token").attr("name", response.tokenKey);
+                            $("#security-token").val(response.token);
+                        }
+                    }, 'json');
+                });
+
+                $('#{{componentId}}-{{sectionId}}-edit-voucher').click(function(e) {
+                    e.preventDefault();
+
+                    //If there are expenses on the current voucher, we should display swal
+                    //On confirmation move all expenses to new voucher #
+                    if (dataCollectionSectionForm['vars']['expensesTable']) {
+                        var rows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
+                        var noOfExpenses = rows.length;
+
+                        if (noOfExpenses > 0) {
+                            dataCollectionSectionForm['funcs']['changeVoucherOrEmployee'](true);
+                        } else {
+                            dataCollectionSectionForm['funcs']['getNextVoucher']();
+                        }
+                    } else {
+                        dataCollectionSectionForm['funcs']['getNextVoucher']();
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-employee_id'                 : {
+            placeholder: 'SELECT TRIP DRIVER',
+            afterInit: function() {
+                var previousEmployeeId = $('#{{componentId}}-{{sectionId}}-employee_id').val();
+                $('#{{componentId}}-{{sectionId}}-employee_id').on('select2:select', function(e) {
+                    //If there are expenses on the current driver, we should display swal
+                    //On confirmation move all expenses to Status 2 (carry forward)
+                    //eslint-disable-next-line
+                    console.log(e.params.data);
+                    if (dataCollectionSectionForm['vars']['expensesTable']) {
+                        var rows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
+                        var noOfExpenses = rows.length;
+
+                        if (noOfExpenses > 0) {
+                            dataCollectionSectionForm['funcs']['changeVoucherOrEmployee'](null, previousEmployeeId);
+                        } else {
+                            //Check carry forwarded expenses
+                            dataCollectionSectionForm['funcs']['checkCarryForwardedExpenses'](e.params.data);
+                        }
+                    } else {
+                        //Check carry forwarded expenses
+                        dataCollectionSectionForm['funcs']['checkCarryForwardedExpenses'](e.params.data);
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-from_date'                   : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-to_date'                     : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-start_odo_reading'           : { },
+        '{{componentId}}-{{sectionId}}-end_odo_reading'             : { },
+        '{{componentId}}-{{sectionId}}-load_odo_reading'            : { },
+        '{{componentId}}-{{sectionId}}-load_location_id'            : {
+            placeholder: "SELECT LOAD LOCATION"
+        },
+        '{{componentId}}-{{sectionId}}-load_location_in_time'       : {
+            enableTime          : true,
+            minuteIncrement     : 1,
+            altFormat           : "d-m-Y H:i",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-load_location_out_time'      : {
+            enableTime          : true,
+            minuteIncrement     : 1,
+            altFormat           : "d-m-Y H:i",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-load_quantity'               : { },
+        '{{componentId}}-{{sectionId}}-load_notes'                  : { },
+        '{{componentId}}-{{sectionId}}-unload_odo_reading'          : { },
+        '{{componentId}}-{{sectionId}}-unload_location_id'          : {
+            placeholder: "SELECT UNLOAD LOCATION"
+        },
+        '{{componentId}}-{{sectionId}}-unload_location_in_time'     : {
+            enableTime          : true,
+            minuteIncrement     : 1,
+            altFormat           : "d-m-Y H:i",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-unload_location_out_time'    : {
+            enableTime          : true,
+            minuteIncrement     : 1,
+            altFormat           : "d-m-Y H:i",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000"
+        },
+        '{{componentId}}-{{sectionId}}-unload_quantity'             : { },
+        '{{componentId}}-{{sectionId}}-wastage'                     : { },
+        '{{componentId}}-{{sectionId}}-unload_notes'                : { },
+        '{{componentId}}-{{sectionId}}-trip_notes'                  : { },
+        '{{componentId}}-{{sectionId}}-expense_id'                  : { },
+        '{{componentId}}-{{sectionId}}-expenses_list'               : {
+            placeholder : "SELECT EXPENSE"
+        },
+        '{{componentId}}-{{sectionId}}-mode_of_payment'             : {
+            placeholder : "SELECT MODE OF PAYMENT"
+        },
+        '{{componentId}}-{{sectionId}}-payment_tx_id'               : { },
+        '{{componentId}}-{{sectionId}}-expense_date'                : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000",
+            defaultDate         : "today"
+        },
+        '{{componentId}}-{{sectionId}}-expense_qty'                 : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-expense_qty').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-expense_qty').val() !== '') {
+                        var rate = $('#{{componentId}}-{{sectionId}}-expense_rate').val();
+                        if (rate === '') {
+                            rate = 1;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-expense_amount')
+                            .val(($('#{{componentId}}-{{sectionId}}-expense_qty').val() * rate).toFixed(2));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-expense_amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-expense_qty_uom'             : {
+            placeholder : "SELECT EXPENSE QTY UOM",
+            allowClear : true
+        },
+        '{{componentId}}-{{sectionId}}-expense_rate'                : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-expense_rate').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-expense_rate').val() !== '') {
+                        var qty = $('#{{componentId}}-{{sectionId}}-expense_qty').val();
+                        if (qty === '') {
+                            qty = 1;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-expense_amount')
+                            .val(($('#{{componentId}}-{{sectionId}}-expense_rate').val() * qty).toFixed(2));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-expense_amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-expense_rate_uom'            : {
+            placeholder : "SELECT EXPENSE RATE UOM",
+            allowClear : true
+        },
+        '{{componentId}}-{{sectionId}}-expense_amount'              : { },
+        '{{componentId}}-{{sectionId}}-expenses'                    : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-expenses').attr('hidden', true);
+
+                if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-expenses-table')) {
+                    var columns =
+                        [
+                            {data: 'expense_id', orderable: false},
+                            {data: 'cf', orderable: false},
+                            {data: 'expense_date', orderable: false},
+                            {data: 'mop', orderable: false},
+                            {data: 'qty', orderable: false},
+                            {data: 'qty_uom_id', orderable: false},
+                            {data: 'rate', orderable: false},
+                            {data: 'rate_uom_id', orderable: false},
+                            {data: 'amount', orderable: false}
+                        ];
+
+                    if (dataCollectionSectionForm['vars']['job']['status'] != '4') {
+                        columns.push({data: 'actions', orderable: false});
+                    }
+
+                    dataCollectionSectionForm['vars']['expensesTable'] = $('#{{componentId}}-{{sectionId}}-expenses-table').DataTable({
+                        columns: columns,
+                        order: false
+                    });
+                }
+
+                dataCollectionSectionForm['funcs']['resetExpensesButtons']();
+
+                $('#{{componentId}}-{{sectionId}}-expenses_list').on('select2:select', function() {
+                    $('#{{componentId}}-{{sectionId}}-mode_of_payment').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-payment_tx_id').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_date').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_qty').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_qty_uom').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_rate').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_rate_uom').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expense_amount').attr('disabled', false);
+                    $('#{{componentId}}-{{sectionId}}-expenses-add').attr('disabled', false);
+                });
+
+                dataCollectionSectionForm['funcs']['addUpdateExpenses']();
+                dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+            }
+        },
+        '{{componentId}}-{{sectionId}}-route_city_id'               : { },
+        '{{componentId}}-{{sectionId}}-route_state_id'              : { },
+        '{{componentId}}-{{sectionId}}-route_state_name'            : { },
+        '{{componentId}}-{{sectionId}}-route_city_name'             : {
+            afterInit: function() {
+                dataCollectionSection["{{componentId}}-{{sectionId}}-form"]["autoCompleteCities"] =
+                    new autoComplete({
+                        data: {
+                            src: async() => {
+                                const url = "{{links.url('system/geo/cities/searchCity')}}";
+
+                                var myHeaders = new Headers();
+                                myHeaders.append("accept", "application/json");
+
+                                var formdata = new FormData();
+                                formdata.append("search", document.querySelector("#{{componentId}}-{{sectionId}}-route_city_name").value);
+                                formdata.append($("#security-token").attr("name"), $("#security-token").val());
+
+                                var requestOptions = {
+                                    method: "POST",
+                                    headers: myHeaders,
+                                    body: formdata
+                                };
+
+                                const responseData = await fetch(url, requestOptions);
+
+                                const response = await responseData.json();
+
+                                if (response.tokenKey && response.token) {
+                                    $("#security-token").attr("name", response.tokenKey);
+                                    $("#security-token").val(response.token);
+                                }
+
+                                if (response.responseData.cities) {
+                                    return response.responseData.cities;
+                                } else {
+                                    return [];
+                                }
+                            },
+                            key: ["name"],
+                            cache: false
+                        },
+                        selector: "#{{componentId}}-{{sectionId}}-route_city_name",
+                        threshold : 3,
+                        debounce: 500,
+                        searchEngine: "strict",
+                        resultsList: {
+                            render: true,
+                            container: source => {
+                                source.setAttribute("id", "{{componentId}}-{{sectionId}}-route_city_list");
+                                source.setAttribute("class", "autoComplete_results");
+                            },
+                            destination: function(e) {
+                                return $('#{{componentId}}-{{sectionId}}-route_city_name').parents('.input-group-sm')[0];
+                            },
+                            position: "afterend",
+                            element: "div",
+                            className: "autoComplete_results"
+                        },
+                        maxResults: 5,
+                        highlight: true,
+                        resultItem: {
+                            content: (data, source) => {
+                                source.innerHTML = data.match + " <span>(State: " + data.value.state_name + ")</span>";
+                            },
+                            element: "div"
+                        },
+                        noResults: () => {
+                            const result = document.createElement("li");
+                            result.setAttribute("class", "autoComplete_result text-danger");
+                            result.setAttribute("tabindex", "1");
+                            result.innerHTML = "No search results. Click field help for more information.";
+
+                            if (document.querySelector("#{{componentId}}-{{sectionId}}-route_city_list")) {
+                                $("#{{componentId}}-{{sectionId}}-route_city_list").empty().append(result);
+                            } else {
+                                $("#{{componentId}}-{{sectionId}}-route_city_name").parent(".form-group").append(
+                                    '<div id="{{componentId}}-{{sectionId}}-route_city_list" class="autoComplete_results"></div>'
+                                );
+                            }
+
+                            $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').attr('disabled', true);
+                        },
+                        onSelection: feedback => {
+                            $("#{{componentId}}-{{sectionId}}-route_city_id").val(feedback.selection.value.id);
+                            $("#{{componentId}}-{{sectionId}}-route_city_id").attr("value", feedback.selection.value.id);
+                            $("#{{componentId}}-{{sectionId}}-route_city_name").blur();
+                            $("#{{componentId}}-{{sectionId}}-route_city_name").val(feedback.selection.value.name);
+                            $("#{{componentId}}-{{sectionId}}-route_state_id").val(feedback.selection.value.state_id);
+                            $("#{{componentId}}-{{sectionId}}-route_state_id").attr("value", feedback.selection.value.state_id);
+                            $("#{{componentId}}-{{sectionId}}-route_state_name").blur();
+                            $("#{{componentId}}-{{sectionId}}-route_state_name").val(feedback.selection.value.state_name);
+                            $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').attr('disabled', false);
+                        }
+                });
+                // On delete
+                $("#{{componentId}}-{{sectionId}}-route_city_name").on("input propertychange", function() {
+                    resetForm();
+                });
+
+                function resetForm(resetCityName = false) {
+                    $("#{{componentId}}-{{sectionId}}-route_city_id").val('');
+                    $("#{{componentId}}-{{sectionId}}-route_city_id").attr("value", '');
+                    if (resetCityName) {
+                        $("#{{componentId}}-{{sectionId}}-route_city_name").val('');
+                        $("#{{componentId}}-{{sectionId}}-route_city_name").attr("value", '');
+                    }
+                    $("#{{componentId}}-{{sectionId}}-route_state_id").val('');
+                    $("#{{componentId}}-{{sectionId}}-route_state_id").attr("value", '');
+                    $("#{{componentId}}-{{sectionId}}-route_state_name").val('');
+                    $("#{{componentId}}-{{sectionId}}-route_state_name").attr("value", '');
+                    $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').attr('disabled', true);
+                }
+
+                $("#{{componentId}}-{{sectionId}}-route_city_name").focusout(function() {
+                    $("#{{componentId}}-{{sectionId}}-city_name_list").children("li").remove();
+                });
+
+                function rebuildTripRoute() {
+                    var html = '';
+                    var locked = '';
+
+                    for (var routes in dataCollectionSection["data"]["route"]) {
+                        if (Object.keys(dataCollectionSection["data"]["route"]).length === 3) {
+                            locked = 'locked';
+                        } else {
+                            if (routes == 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+                                locked = 'locked';
+                            } else {
+                                locked = '';
+                            }
+                        }
+
+                        html +=
+                            '<h6 class="m-0 d-inline ' + locked + '" data-route-seq="' + routes + '" data-route-city-id="' + dataCollectionSection["data"]["route"][routes]["city_id"] +
+                            '" data-route-city-name="' + dataCollectionSection["data"]["route"][routes]["city_name"] + '" data-route-state-id="' +
+                            dataCollectionSection["data"]["route"][routes]["state_id"] + '" data-route-state-name="' + dataCollectionSection["data"]["route"][routes]["state_name"] +
+                            '"><span class="text-primary text-uppercase">' + dataCollectionSection["data"]["route"][routes]["city_name"] + ' (' +
+                            dataCollectionSection["data"]["route"][routes]["state_name"] + ')</span> ';
+
+                        if (routes != Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+                            html +=
+                                ' <i class="text-success fa-solid fa-arrow-right"></i> ';
+                        }
+
+                        html +=
+                            '</h6>';
+                    }
+
+                    $('#trip-sortable-route').empty().html(html);
+
+                    resetForm(true);
+                }
+
+                $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').off();
+                $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').click(function(e) {
+                    e.preventDefault();
+
+                    var nextIndex = Object.keys(dataCollectionSection["data"]["route"]).length - 1;
+                    var lastIndexObject = dataCollectionSection["data"]["route"][nextIndex];
+
+                    if ($(this)[0].id === '{{componentId}}-{{sectionId}}-add-city') {
+                        dataCollectionSection["data"]["route"][nextIndex] = { };
+                        dataCollectionSection["data"]["route"][nextIndex]['city_id'] = parseInt($("#{{componentId}}-{{sectionId}}-route_city_id").val());
+                        dataCollectionSection["data"]["route"][nextIndex]['city_name'] = $("#{{componentId}}-{{sectionId}}-route_city_name").val();
+                        dataCollectionSection["data"]["route"][nextIndex]['state_id'] = parseInt($("#{{componentId}}-{{sectionId}}-route_state_id").val());
+                        dataCollectionSection["data"]["route"][nextIndex]['state_name'] = $("#{{componentId}}-{{sectionId}}-route_state_name").val();
+                        dataCollectionSection["data"]["route"][nextIndex + 1] = lastIndexObject;
+                    } else if ($(this)[0].id === '{{componentId}}-{{sectionId}}-remove-city') {
+                        var cityId = parseInt($("#{{componentId}}-{{sectionId}}-route_city_id").val());
+                        for (var routes in dataCollectionSection["data"]["route"]) {
+                            if (cityId === dataCollectionSection["data"]["route"][routes]['city_id']) {
+                                if (routes == 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+                                    if (routes == 0) {
+                                        paginatedPNotify('error', {title: 'Can not remove start of trip'});
+                                    } else {
+                                        paginatedPNotify('error', {title: 'Can not remove end of trip'});
+                                    }
+
+                                    return;
+                                } else {
+                                    delete(dataCollectionSection["data"]["route"][routes]);
+
+                                    break;
+                                }
+                            }
+                        }
+                        dataCollectionSection["data"]["route"] = Object.values(dataCollectionSection["data"]["route"]);
+                    }
+
+                    rebuildTripRoute();
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-route'                       : {
+            afterInit: function() {
+                function collectTripSortableData() {
+                    if ($("#trip-sortable-route h6").length > 0) {
+                        var data = { };
+                        $("#trip-sortable-route h6").each(function(index, h6) {
+                            data[index] = { };
+                            data[index]['city_id'] = $(h6).data("route-city-id");
+                            data[index]['city_name'] = $(h6).data("route-city-name");
+                            data[index]['state_id'] = $(h6).data("route-state-id");
+                            data[index]['state_name'] = $(h6).data("route-state-name");
+
+                            dataCollectionSection["data"]["route"] = data;
+                        });
+                    }
+                }
+                collectTripSortableData();
+
+                var el = document.getElementById($("#trip-sortable-route")[0].id);
+                dataCollectionSectionForm['vars']['route'] = { };
+                dataCollectionSectionForm['vars']['route'] = Sortable.create(el, {
+                    dataIdAttr : "data-route-seq",
+                    filter: '.locked',
+                    onEnd: function(e) {
+                        collectTripSortableData();
+                    }
+                });
+            }
+        },
         '{{componentId}}-{{sectionId}}-form'                        : {
+            ignore: ':submit, :reset, :image, :disabled, .ignore, .cr-slider',
             rules: {
                 '{{componentId}}-{{sectionId}}-id'                      : 'required',
                 '{{componentId}}-{{sectionId}}-financial_year'          : 'required',
@@ -1201,6 +2482,7 @@ dataCollectionSection =
                 '{{componentId}}-{{sectionId}}-from_company_address_id' : 'required',
                 '{{componentId}}-{{sectionId}}-to_company_id'           : 'required',
                 '{{componentId}}-{{sectionId}}-to_company_address_id'   : 'required',
+                '{{componentId}}-{{sectionId}}-charges'                 : 'required',
             },
             messages: {
                 '{{componentId}}-{{sectionId}}-id'                      : 'Please enter lorry receipt #',
@@ -1213,8 +2495,14 @@ dataCollectionSection =
                 '{{componentId}}-{{sectionId}}-from_company_address_id' : 'Please select consigner address',
                 '{{componentId}}-{{sectionId}}-to_company_id'           : 'Please select consignee',
                 '{{componentId}}-{{sectionId}}-to_company_address_id'   : 'Please select consignee address',
+                '{{componentId}}-{{sectionId}}-charges'                 : 'Please assign charges to Lorry Receipt',
             },
             onSubmit: function() {
+                if (window.dataCollectionSection['dataToSubmit']['charges'] === '') {
+                    //
+                }
+                //eslint-disable-next-line
+                console.log();
                 return true;
             }
         }

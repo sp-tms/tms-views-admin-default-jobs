@@ -1,7 +1,7 @@
 {% if job['id'] is defined %}
     {% set jobId = job['id'] %}
-    {% set jobLr = job['id'] %}
     {% set jobFy = job['financial_year'] %}
+    {% set jobLr = job['id'] %}
     {% set jobDate = job['date'] %}
     {% set jobStatus = job['status'] %}
     {% set jobVehicle = job['vehicle_id'] %}
@@ -15,10 +15,10 @@
     {% set jobLrInternalNotes = job['lr_dev_notes'] %}
 {% else %}
     {% set jobId = '' %}
-    {% set jobLr = job['lr_no'] %}
     {% set jobFy = job['financial_year'] %}
+    {% set jobLr = job['lr_no'] %}
     {% set jobDate = job['date'] %}
-    {% set jobStatus = 0 %}
+    {% set jobStatus = 1 %}
     {% set jobVehicle = '' %}
     {% set jobOrganisation = '' %}
     {% set jobCompany = '' %}
@@ -62,7 +62,42 @@
                 'componentName'                         : componentName,
                 'componentId'                           : componentId,
                 'sectionId'                             : sectionId,
-                'fieldId'                               : 'lr',
+                'fieldId'                               : 'financial_year',
+                'fieldLabel'                            : 'Financial Year',
+                'fieldType'                             : 'input',
+                'fieldDataInputMaxLength'               : 10,
+                'fieldHelp'                             : true,
+                'fieldHelp'                             : true,
+                'fieldHelpTooltipContent'               : 'Financial Year',
+                'fieldInputToggleEdit'                  : true,
+                'fieldGroupPreAddonButtons'             :
+                    [
+                        'edit-financial_year'         : [
+                            'title'                         : false,
+                            'icon'                          : 'wand-magic-sparkles',
+                            'noMargin'                      : true,
+                            'buttonAdditionalClass'         : 'rounded-0 text-white',
+                            'position'                      : 'right'
+                        ]
+                    ],
+                'fieldRequired'                         : true,
+                'fieldDisabled'                         : true,
+                'fieldBazScan'                          : true,
+                'fieldBazJstreeSearch'                  : true,
+                'fieldBazPostOnCreate'                  : true,
+                'fieldBazPostOnUpdate'                  : true,
+                'fieldValue'                            : jobFy
+            ]
+        )}}
+    </div>
+    <div class="col">
+        {{adminltetags.useTag('fields',
+            [
+                'component'                             : component,
+                'componentName'                         : componentName,
+                'componentId'                           : componentId,
+                'sectionId'                             : sectionId,
+                'fieldId'                               : 'lr_no',
                 'fieldLabel'                            : 'Lorry Receipt #',
                 'fieldType'                             : 'input',
                 'fieldInputTypeTextFilter'              : 'positiveInt',
@@ -97,41 +132,6 @@
                 'fieldBazPostOnCreate'                  : true,
                 'fieldBazPostOnUpdate'                  : true,
                 'fieldValue'                            : jobLr
-            ]
-        )}}
-    </div>
-    <div class="col">
-        {{adminltetags.useTag('fields',
-            [
-                'component'                             : component,
-                'componentName'                         : componentName,
-                'componentId'                           : componentId,
-                'sectionId'                             : sectionId,
-                'fieldId'                               : 'financial_year',
-                'fieldLabel'                            : 'Financial Year',
-                'fieldType'                             : 'input',
-                'fieldDataInputMaxLength'               : 10,
-                'fieldHelp'                             : true,
-                'fieldHelp'                             : true,
-                'fieldHelpTooltipContent'               : 'Financial Year',
-                'fieldInputToggleEdit'                  : true,
-                'fieldGroupPreAddonButtons'             :
-                    [
-                        'edit-financial_year'         : [
-                            'title'                         : false,
-                            'icon'                          : 'wand-magic-sparkles',
-                            'noMargin'                      : true,
-                            'buttonAdditionalClass'         : 'rounded-0 text-white',
-                            'position'                      : 'right'
-                        ]
-                    ],
-                'fieldRequired'                         : true,
-                'fieldDisabled'                         : true,
-                'fieldBazScan'                          : true,
-                'fieldBazJstreeSearch'                  : true,
-                'fieldBazPostOnCreate'                  : true,
-                'fieldBazPostOnUpdate'                  : true,
-                'fieldValue'                            : jobFy
             ]
         )}}
     </div>
