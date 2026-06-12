@@ -38,6 +38,34 @@
             'updateSuccessRedirectUrl'      : 'jobs',
             'cancelActionUrl'               : 'jobs',
             'closeActionUrl'                : 'jobs'
+        ],
+        'dataDependencies'              :
+        [
+            [
+                'componentName'      : 'Companies (Organisation)',
+                'componentVar'       : organisations,
+                'componentRoute'     : 'companies/q/id/0/businesstype/organisations'
+            ],
+            [
+                'componentName'      : 'Companies (Customers)',
+                'componentVar'       : customers,
+                'componentRoute'     : 'companies/q/id/0/businesstype/customers'
+            ],
+            [
+                'componentName'      : 'Companies (Vendors)',
+                'componentVar'       : vendors,
+                'componentRoute'     : 'companies/q/id/0/businesstype/vendors'
+            ],
+            [
+                'componentName'      : 'Employees',
+                'componentVar'       : employees,
+                'componentRoute'     : 'employees/q/id/0'
+            ],
+            [
+                'componentName'      : 'Vehicles',
+                'componentVar'       : vehicles,
+                'componentRoute'     : 'vehicles/q/id/0'
+            ]
         ]
     ]
 )}}
