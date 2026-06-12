@@ -1,4 +1,667 @@
 {% if jobVoucher is defined and jobVoucher != '' and jobEmployeeId is defined and jobEmployeeId != '0' %}
+    {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_id',
+                        'fieldLabel'                     : 'Fuel ID',
+                        'fieldType'                      : 'input',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Fuel ID',
+                        'fieldRequired'                  : true,
+                        'fieldHidden'                    : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_tx_type',
+                        'fieldLabel'                     : 'Transaction Type',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select a fuel transaction type',
+                        'fieldRequired'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : fuelTransactionTypes,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_payment_tx_id',
+                        'fieldLabel'                     : 'Online Transaction ID',
+                        'fieldType'                      : 'input',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Online Transaction ID',
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : true,
+                        'fieldHidden'                    : false,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'from_route_location',
+                        'fieldLabel'                     : 'From Route location',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select from route location',
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : job['trip']['route'],
+                        'fieldDataSelect2OptionsKey'     : 'city_id',
+                        'fieldDataSelect2OptionsValue'   : 'city_name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'to_route_location',
+                        'fieldLabel'                     : 'To Route location',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select to route location',
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : job['trip']['route'],
+                        'fieldDataSelect2OptionsKey'     : 'city_id',
+                        'fieldDataSelect2OptionsValue'   : 'city_name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col" id="fuel-stations">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'vendor_id',
+                        'fieldLabel'                     : 'Fuel Station',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select a fuel station vendor',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : vendors,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'name',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col" id="fuel-vehicles" hidden>
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'transfer_to_vehicle_id',
+                        'fieldLabel'                     : 'Transfer to Vehicle',
+                        'fieldType'                      : 'select2',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Select a vehicle to transfer fuel to',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataSelect2Create'         : true,
+                        'fieldDataSelect2Options'        : vehicles,
+                        'fieldDataSelect2OptionsKey'     : 'id',
+                        'fieldDataSelect2OptionsValue'   : 'registration_no',
+                        'fieldDataSelect2OptionsArray'   : true,
+                        'fieldDataSelect2OptionsSelected': ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                             : component,
+                        'componentName'                         : componentName,
+                        'componentId'                           : componentId,
+                        'sectionId'                             : sectionId,
+                        'fieldId'                               : 'fill_transfer_date',
+                        'fieldLabel'                            : 'Fill/Transfer Date',
+                        'fieldType'                             : 'flatpickr',
+                        'fieldHelp'                             : true,
+                        'fieldHelpTooltipContent'               : 'Fill/Transfer Date',
+                        'fieldRequired'                         : true,
+                        'fieldBazScan'                          : true,
+                        'fieldBazJstreeSearch'                  : true,
+                        'fieldBazPostOnCreate'                  : false,
+                        'fieldBazPostOnUpdate'                  : false,
+                        'fieldValue'                            : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'open_odo_reading',
+                        'fieldLabel'                     : 'Open Odo Reading (Km)',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Open Km of fuel',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'close_odo_reading',
+                        'fieldLabel'                     : 'Close Odo Reading (km)',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Close Odo Reading (km)',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'total_odo_reading',
+                        'fieldLabel'                     : 'Total Odo Reading (km)',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Total Odo Reading (km)',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'kmpl',
+                        'fieldLabel'                     : 'km/l',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'km/l',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'average',
+                        'fieldLabel'                     : 'Average (km)',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Average (km)',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_qty',
+                        'fieldLabel'                     : 'Fuel Quantity (L)',
+                        'fieldType'                      : 'input',
+                        'fieldInputTypeTextFilter'       : 'positiveFloat',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Quantity of fuel',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_rate',
+                        'fieldLabel'                     : 'Fuel Rate',
+                        'fieldType'                      : 'input',
+                        'fieldGroupPreAddonText'         : currencySymbol,
+                        'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                        'fieldDataInputMaxLength'        : 10,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 9999999999,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Rate',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_amount',
+                        'fieldLabel'                     : 'Amount',
+                        'fieldType'                      : 'input',
+                        'fieldInputToggleEdit'           : true,
+                        'fieldGroupPreAddonText'         : currencySymbol,
+                        'fieldInputTypeTextFilter'       : 'positiveCurrency',
+                        'fieldDataInputMaxLength'        : 20,
+                        'fieldDataInputMinNumber'        : 0,
+                        'fieldDataInputMaxNumber'        : 99999999999999,
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Fuel Amount',
+                        'fieldRequired'                  : true,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('fields',
+                    [
+                        'component'                      : component,
+                        'componentName'                  : componentName,
+                        'componentId'                    : componentId,
+                        'sectionId'                      : sectionId,
+                        'fieldId'                        : 'fuel_notes',
+                        'fieldLabel'                     : 'Fuel Notes',
+                        'fieldType'                      : 'textarea',
+                        'fieldHelp'                      : true,
+                        'fieldHelpTooltipContent'        : 'Additional notes for the fuel transaction',
+                        'fieldRequired'                  : false,
+                        'fieldDisabled'                  : true,
+                        'fieldBazScan'                   : true,
+                        'fieldBazPostOnCreate'           : false,
+                        'fieldBazPostOnUpdate'           : false,
+                        'fieldDataInputMaxLength'        : 1024,
+                        'fieldTextareaRows'              : 2,
+                        'fieldValue'                     : ''
+                    ]
+                )}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{adminltetags.useTag('buttons',
+                    [
+                        'componentId'           : componentId,
+                        'sectionId'             : sectionId,
+                        'buttonType'            : 'button',
+                        'buttons'               :
+                            [
+                                'fuels-add' : [
+                                    'title'                   : 'Add',
+                                    'position'                : 'right',
+                                    'disabled'                : true,
+                                    'icon'                    : 'cog fa-spin',
+                                    'iconHidden'              : true,
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'size'                    : 'sm'
+                                ],
+                                'fuels-update' : [
+                                    'title'                   : 'Update',
+                                    'position'                : 'right',
+                                    'hidden'                  : true,
+                                    'icon'                    : 'cog fa-spin',
+                                    'iconHidden'              : true,
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'disabled'                : true,
+                                    'size'                    : 'sm'
+                                ],
+                                'fuels-cancel' : [
+                                    'title'                   : 'Cancel',
+                                    'type'                    : 'secondary',
+                                    'buttonAdditionalClass'   : 'text-white',
+                                    'position'                : 'right',
+                                    'size'                    : 'sm'
+                                ]
+                            ]
+                    ]
+                )}}
+            </div>
+        </div>
+        <hr>
+    {% endif %}
+    {% set tableData = '' %}
+    {% set jobFuel = '' %}
+    {% if job['fuels'] is defined and job['fuels']|length > 0 %}
+        {% set jobFuel = job['fuels']|length %}
+        {% for fuel in job['fuels'] %}
+            {% if job['vehicle_id'] != fuel['vehicle_id'] %}
+                {% continue %}
+            {% endif %}
+            {% set tableData = tableData ~ '<tr id="' ~ fuel['id'] ~ '">' %}
+                {% if fuelTransactionTypes is defined and fuelTransactionTypes[fuel['fuel_tx_type']] is defined %}
+                    {% set tableData = tableData ~ '<td>' ~ fuelTransactionTypes[fuel['fuel_tx_type']]['name'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['fill_transfer_date'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['fill_transfer_date'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['fuel_tx_type'] != '3' %}
+                    {% if vendors[fuel['vendor_id']] is defined %}
+                        {% set tableData = tableData ~ '<td>' ~ vendors[fuel['vendor_id']]['name'] ~ '</td>' %}
+                    {% else %}
+                        {% set tableData = tableData ~ '<td>' ~ fuel['vendor_id'] ~ '</td>' %}
+                    {% endif %}
+                {% else %}
+                    {% if vehicles[fuel['transfer_to_vehicle_id']] is defined %}
+                        {% set tableData = tableData ~ '<td>' ~ vehicles[fuel['transfer_to_vehicle_id']]['registration_no'] ~ '</td>' %}
+                    {% else %}
+                        {% set tableData = tableData ~ '<td>' ~ fuel['transfer_to_vehicle_id'] ~ '</td>' %}
+                    {% endif %}
+                {% endif %}
+                {% if fuel['open_odo_reading'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['open_odo_reading'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['close_odo_reading'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['close_odo_reading'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['total_odo_reading'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['total_odo_reading'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['kmpl'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['kmpl'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['average'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['average'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['quantity'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['quantity'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['rate'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['rate'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['amount'] %}
+                    {% set tableData = tableData ~ '<td>' ~ fuel['amount'] ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% set fromRouteLocation = fuel['from_route_location'] %}
+                {% set toRouteLocation = fuel['to_route_location'] %}
+                {% if job['trip']['route']|length > 0 %}
+                    {% for route in job['trip']['route'] %}
+                        {% if route['city_id'] == fuel['from_route_location'] %}
+                            {% set fromRouteLocation = route['city_name'] %}
+                        {% endif %}
+                        {% if route['city_id'] == fuel['to_route_location'] %}
+                            {% set toRouteLocation = route['city_name'] %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if fromRouteLocation %}
+                    {% set tableData = tableData ~ '<td>' ~ fromRouteLocation ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if toRouteLocation %}
+                    {% set tableData = tableData ~ '<td>' ~ toRouteLocation ~ '</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if fuel['fuel_notes'] and fuel['fuel_notes'] != '' %}
+                    {% set tableData = tableData ~ '<td>Y</td>' %}
+                {% else %}
+                    {% set tableData = tableData ~ '<td>-</td>' %}
+                {% endif %}
+                {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+                    {% set fuelsButtons = [] %}
+                    {% set fuelsButtons['edit-' ~ fuel['id']] = [
+                            'title'                   : false,
+                            'icon'                    : 'edit',
+                            'size'                    : 'xs',
+                            'buttonAdditionalClass'   : 'editFuel text-white',
+                            'type'                    : 'warning',
+                            'data'                    : [
+                                'id'                  : fuel['id']
+                            ]
+                        ]
+                    %}
+                    {% set fuelsButtons['remove-' ~ fuel['id']] = [
+                            'title'                   : false,
+                            'icon'                    : 'trash',
+                            'size'                    : 'xs',
+                            'buttonAdditionalClass'   : 'removeFuel text-white',
+                            'type'                    : 'danger',
+                            'data'                    : [
+                                'id'                  : fuel['id']
+                            ]
+                        ]
+                    %}
+                    {% set tableData = tableData ~
+                        '<td>' ~ adminltetags.useTag('buttons',
+                                    [
+                                        'component'                     : component,
+                                        'componentName'                 : componentName,
+                                        'componentId'                   : componentId,
+                                        'parentComponentId'             : parent,
+                                        'sectionId'                     : sectionId,
+                                        'buttonType'                    : 'button',
+                                        'buttons'                       : fuelsButtons
+                                    ]
+                                ) ~ '</td>'
+                    %}
+                {% endif %}
+                {% set tableData = tableData ~ '</tr>' %}
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            {{adminltetags.useTag('fields',
+                [
+                    'component'                      : component,
+                    'componentName'                  : componentName,
+                    'componentId'                    : componentId,
+                    'sectionId'                      : sectionId,
+                    'fieldId'                        : 'fuels',
+                    'fieldLabel'                     : 'Fuel',
+                    'fieldType'                      : 'input',
+                    'fieldInputTypeTextFilter'       : 'positiveInt',
+                    'fieldDataInputMinNumber'        : 0,
+                    'fieldDataInputMaxNumber'        : 999,
+                    'fieldAdditionalClass'           : 'mb-1',
+                    'fieldHelp'                      : true,
+                    'fieldHelpTooltipContent'        : 'List of fuels for this voucher.',
+                    'fieldRequired'                  : true,
+                    'fieldBazScan'                   : true,
+                    'fieldBazJstreeSearch'           : true,
+                    'fieldBazPostOnCreate'           : true,
+                    'fieldBazPostOnUpdate'           : true,
+                    'fieldValue'                     : jobFuel
+                ]
+            )}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table id="{{componentId}}-{{sectionId}}-fuels-table" class="table table-sm table-hover responsive nowrap mb-0" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase">Transaction Type</th>
+                        <th class="text-uppercase">Date</th>
+                        <th class="text-uppercase">To</th>
+                        <th class="text-uppercase">Open Odo</th>
+                        <th class="text-uppercase">Close Odo</th>
+                        <th class="text-uppercase">Total Odo</th>
+                        <th class="text-uppercase">km/l</th>
+                        <th class="text-uppercase">Avg</th>
+                        <th class="text-uppercase">Qty</th>
+                        <th class="text-uppercase">{{ currencySymbol }} Rate</th>
+                        <th class="text-uppercase">{{ currencySymbol }} AMOUNT</th>
+                        <th class="text-uppercase">From Route Location</th>
+                        <th class="text-uppercase">To Route Location</th>
+                        <th class="text-uppercase">Notes</th>
+                        {% if job['status'] is not defined or job['status'] is defined and job['status'] != '4' %}
+                            <th class="text-uppercase">ACTIONS</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>{{tableData}}</tbody>
+            </table>
+        </div>
+    </div>
 {% else %}
     <span class="text-danger text-uppercase"><i class="mr-1 fas fa-fw fa-circle-exclamation"></i>Please assign voucher # and driver to the trip to modify fuel</span>
 {% endif %}

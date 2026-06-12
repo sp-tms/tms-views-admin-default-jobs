@@ -104,7 +104,6 @@
                             'tabsData'                      : tabsData
                         ]
                     )}}
-                    {% set jobDetails = json_encode(job, 16) %}
                 {% else %}
                     {% include('jobs/form/lr') %}
                 {% endif %}
@@ -121,7 +120,10 @@
 {% set uoms = escaper.js(json_encode(uoms, 16)) %}
 {% set charges = escaper.js(json_encode(charges, 16)) %}
 {% set expenses = escaper.js(json_encode(expenses, 16)) %}
+{% set fuelTransactionTypes = escaper.js(json_encode(fuelTransactionTypes, 16)) %}
 {% set jobDetails = escaper.js(json_encode(job, 16)) %}
+{% set vendors = escaper.js(json_encode(vendors, 16)) %}
+{% set vehicles = escaper.js(json_encode(vehicles, 16)) %}
 <script>
 /*global paginatedPNotify BazProgress BazContentFields BazHelpers BazContentLoader Pace BazCore dataCollection Swal Sortable autoComplete */
 var dataCollectionComponent, dataCollectionSection, dataCollectionSectionForm;
@@ -163,6 +165,9 @@ dataCollectionSectionForm['vars']['uoms'] = JSON.parse('{{uoms}}');
 dataCollectionSectionForm['vars']['charges'] = JSON.parse('{{charges}}');
 dataCollectionSectionForm['vars']['expenses'] = JSON.parse('{{expenses}}');
 dataCollectionSectionForm['vars']['job'] = JSON.parse('{{jobDetails}}');
+dataCollectionSectionForm['vars']['fuelTransactionTypes'] = JSON.parse('{{fuelTransactionTypes}}');
+dataCollectionSectionForm['vars']['vendors'] = JSON.parse('{{vendors}}');
+dataCollectionSectionForm['vars']['vehicles'] = JSON.parse('{{vehicles}}');
 
 dataCollectionSectionForm['funcs']['resetChargesButtons'] = function() {
     $('.editCharge').off();
@@ -303,9 +308,9 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
             }
             if (thisId === '{{componentId}}-{{sectionId}}-charges-update') {
                 url = '{{links.url("jobs/updateJobsCharge")}}';
+                postData['id'] = $('#{{componentId}}-{{sectionId}}-charge_id').val();
             }
 
-            postData['id'] = $('#{{componentId}}-{{sectionId}}-charge_id').val();
             postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
             postData['charge_id'] = $('#{{componentId}}-{{sectionId}}-charges_list').val();
             var select2Charges = $('#{{componentId}}-{{sectionId}}-charges_list').select2('data');
@@ -331,23 +336,23 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
             postData['amount'] = $('#{{componentId}}-{{sectionId}}-amount').val();
 
             if (postData['charge_id'] == 0) {
-                paginatedPNotify('error', {text : 'Please select charge!'});
+                paginatedPNotify('error', {text : 'Please select charge'});
                 return;
             }
             if (postData['visibility'] == 0) {
-                paginatedPNotify('error', {text : 'Please select visibility!'});
+                paginatedPNotify('error', {text : 'Please select visibility'});
                 return;
             }
             if (postData['quantity'] === '' || postData['quantity'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct quantity!'});
+                paginatedPNotify('error', {text : 'Please enter correct quantity'});
                 return;
             }
             if (postData['rate'] === '' || postData['rate'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct rate!'});
+                paginatedPNotify('error', {text : 'Please enter correct rate'});
                 return;
             }
             if (postData['amount'] === '' || postData['amount'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct amount!'});
+                paginatedPNotify('error', {text : 'Please enter correct amount'});
                 return;
             }
 
@@ -506,6 +511,9 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
 
                     dataCollectionSectionForm['funcs']['resetChargesButtons']();
                     dataCollectionSectionForm['funcs']['resetChargesForm']();
+                    if (!dataCollectionSectionForm['vars']['job']['charges']) {
+                        dataCollectionSectionForm['vars']['job']['charges'] = { };
+                    }
                     dataCollectionSectionForm['vars']['job']['charges'][charge['id']] = charge;
 
                     paginatedPNotify('success', {
@@ -521,6 +529,71 @@ dataCollectionSectionForm['funcs']['addUpdateCharges'] = function() {
             }, 'json');
         }
     });
+}
+
+dataCollectionSectionForm['funcs']['resetTripRouteForm'] = function(resetCityName = false) {
+    $("#{{componentId}}-{{sectionId}}-route_city_id").val('');
+    $("#{{componentId}}-{{sectionId}}-route_city_id").attr("value", '');
+    if (resetCityName) {
+        $("#{{componentId}}-{{sectionId}}-route_city_name").val('');
+        $("#{{componentId}}-{{sectionId}}-route_city_name").attr("value", '');
+    }
+    $("#{{componentId}}-{{sectionId}}-route_state_id").val('');
+    $("#{{componentId}}-{{sectionId}}-route_state_id").attr("value", '');
+    $("#{{componentId}}-{{sectionId}}-route_state_name").val('');
+    $("#{{componentId}}-{{sectionId}}-route_state_name").attr("value", '');
+    $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').attr('disabled', true);
+}
+
+dataCollectionSectionForm['funcs']['collectTripSortableData'] = function() {
+    if ($("#trip-sortable-route h6").length > 0) {
+        var data = { };
+        $("#trip-sortable-route h6").each(function(index, h6) {
+            data[index] = { };
+            data[index]['city_id'] = $(h6).data("route-city-id");
+            data[index]['city_name'] = $(h6).data("route-city-name");
+            data[index]['state_id'] = $(h6).data("route-state-id");
+            data[index]['state_name'] = $(h6).data("route-state-name");
+
+            dataCollectionSection["data"]["route"] = data;
+        });
+    }
+}
+
+dataCollectionSectionForm['funcs']['rebuildTripRoute'] = function() {
+    var html = '';
+    var locked = '';
+
+    for (var routes in dataCollectionSection["data"]["route"]) {
+        if (Object.keys(dataCollectionSection["data"]["route"]).length === 3) {
+            locked = 'locked';
+        } else {
+            if (routes == 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+                locked = 'locked';
+            } else {
+                locked = '';
+            }
+        }
+
+        html +=
+            '<h6 class="m-0 d-inline ' + locked + '" data-route-seq="' + routes + '" data-route-city-id="' + dataCollectionSection["data"]["route"][routes]["city_id"] +
+            '" data-route-city-name="' + dataCollectionSection["data"]["route"][routes]["city_name"] + '" data-route-state-id="' +
+            dataCollectionSection["data"]["route"][routes]["state_id"] + '" data-route-state-name="' + dataCollectionSection["data"]["route"][routes]["state_name"] +
+            '"><span class="text-primary text-uppercase">' + dataCollectionSection["data"]["route"][routes]["city_name"] + ' (' +
+            dataCollectionSection["data"]["route"][routes]["state_name"] + ')</span> ';
+
+        if (routes != Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+            html +=
+                ' <i class="text-success fa-solid fa-arrow-right"></i> ';
+        }
+
+        html +=
+            '</h6>';
+    }
+
+    $('#trip-sortable-route').empty().html(html);
+
+    dataCollectionSectionForm['funcs']['resetTripRouteForm'](true);
 }
 
 dataCollectionSectionForm['funcs']['resetExpensesButtons'] = function() {
@@ -643,27 +716,6 @@ dataCollectionSectionForm['funcs']['resetExpensesForm'] = function() {
     $('#{{componentId}}-{{sectionId}}-expense_amount').attr('disabled', true);
 }
 
-dataCollectionSectionForm['funcs']['updateCounters'] = function(type) {
-    if (type === 'expenses') {
-        var rows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
-        var noOfExpenses = rows.length;
-        var totalExpenses = 0;
-
-        if (noOfExpenses > 0) {
-            $(rows).each(function(index, row) {
-                if (parseInt(row.amount) > 0) {
-                    totalExpenses += parseInt(row.amount);
-                }
-            });
-        }
-
-        $('#{{componentId}}-{{sectionId}}-queue-no_of_expenses .badge').html(noOfExpenses);
-        $('#{{componentId}}-{{sectionId}}-queue-total_expenses_amount .badge').html("{{currencySymbol}} " + totalExpenses);
-    } else if (type === 'fuel') {
-        //
-    }
-}
-
 dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
     $('#{{componentId}}-{{sectionId}}-expenses-add, #{{componentId}}-{{sectionId}}-expenses-update, #{{componentId}}-{{sectionId}}-expenses-cancel').off();
     $('#{{componentId}}-{{sectionId}}-expenses-add, #{{componentId}}-{{sectionId}}-expenses-update, #{{componentId}}-{{sectionId}}-expenses-cancel').click(function(e) {
@@ -689,9 +741,9 @@ dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
             }
             if (thisId === '{{componentId}}-{{sectionId}}-expenses-update') {
                 url = '{{links.url("jobs/updateJobsExpense")}}';
+                postData['id'] = $('#{{componentId}}-{{sectionId}}-expense_id').val();
             }
 
-            postData['id'] = $('#{{componentId}}-{{sectionId}}-expense_id').val();
             postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
             postData['voucher_no'] = $('#{{componentId}}-{{sectionId}}-voucher_no').val();
             postData['employee_id'] = $('#{{componentId}}-{{sectionId}}-employee_id').val();
@@ -725,27 +777,31 @@ dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
                 return;
             }
             if (postData['employee_id'] === '' || postData['employee_id'] == 0) {
-                paginatedPNotify('error', {text : 'Please select employee!'});
+                paginatedPNotify('error', {text : 'Please select employee'});
                 return;
             }
             if (postData['expense_id'] === '' || postData['expense_id'] == 0) {
-                paginatedPNotify('error', {text : 'Please select expense!'});
+                paginatedPNotify('error', {text : 'Please select expense'});
+                return;
+            }
+            if (postData['expense_date'] === '' || postData['expense_date'] == 0) {
+                paginatedPNotify('error', {text : 'Please select expense date'});
                 return;
             }
             if (!postData['mode_of_payment'] || postData['mode_of_payment'] === '' || postData['mode_of_payment'] == 0) {
-                paginatedPNotify('error', {text : 'Please select mode of payment!'});
+                paginatedPNotify('error', {text : 'Please select mode of payment'});
                 return;
             }
             if (postData['quantity'] === '' || postData['quantity'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct quantity!'});
+                paginatedPNotify('error', {text : 'Please enter correct quantity'});
                 return;
             }
             if (postData['rate'] === '' || postData['rate'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct rate!'});
+                paginatedPNotify('error', {text : 'Please enter correct rate'});
                 return;
             }
             if (postData['amount'] === '' || postData['amount'] == '0') {
-                paginatedPNotify('error', {text : 'Please enter correct amount!'});
+                paginatedPNotify('error', {text : 'Please enter correct amount'});
                 return;
             }
 
@@ -904,6 +960,9 @@ dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
                     dataCollectionSectionForm['funcs']['resetExpensesButtons']();
                     dataCollectionSectionForm['funcs']['resetExpensesForm']();
                     dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+                    if (!dataCollectionSectionForm['vars']['job']['expenses']) {
+                        dataCollectionSectionForm['vars']['job']['expenses'] = { };
+                    }
                     dataCollectionSectionForm['vars']['job']['expenses'][expense['id']] = expense;
 
                     paginatedPNotify('success', {
@@ -919,6 +978,543 @@ dataCollectionSectionForm['funcs']['addUpdateExpenses'] = function() {
             }, 'json');
         }
     });
+}
+
+dataCollectionSectionForm['funcs']['resetFuelsButtons'] = function() {
+    $('.editFuel').off();
+    $('.editFuel').click(function(e) {
+        e.preventDefault();
+
+        dataCollectionSectionForm['funcs']['addUpdateFuels']();
+
+        var fuelId = $(this).data()['id'];
+        //eslint-disable-next-line
+        console.log(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]);
+        $('#{{componentId}}-{{sectionId}}-fuel_id').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['id']);
+        $('#{{componentId}}-{{sectionId}}-fuel_tx_type').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['fuel_tx_type']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['fuel_payment_tx_id']);
+        $('#{{componentId}}-{{sectionId}}-from_route_location').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['from_route_location']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-to_route_location').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['to_route_location']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-vendor_id').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['vendor_id']).trigger('change');
+        $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['transfer_to_vehicle_id']).trigger('change');
+        dataCollectionSection['{{componentId}}-{{sectionId}}-fill_transfer_date']['flatpickr'].setDate(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['fill_transfer_date']);
+        $('#{{componentId}}-{{sectionId}}-open_odo_reading').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['open_odo_reading']);
+        $('#{{componentId}}-{{sectionId}}-close_odo_reading').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['close_odo_reading']);
+        $('#{{componentId}}-{{sectionId}}-total_odo_reading').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['total_odo_reading']);
+        $('#{{componentId}}-{{sectionId}}-kmpl').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['kmpl']);
+        $('#{{componentId}}-{{sectionId}}-average').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['average']);
+        $('#{{componentId}}-{{sectionId}}-fuel_qty').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['quantity']);
+        $('#{{componentId}}-{{sectionId}}-fuel_rate').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['rate']);
+        $('#{{componentId}}-{{sectionId}}-fuel_amount').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['amount']);
+        $('#{{componentId}}-{{sectionId}}-fuel_notes').val(dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['fuel_notes']);
+
+        dataCollectionSectionForm['funcs']['resetFuelsForm'](dataCollectionSectionForm['vars']['job']['fuels'][fuelId]['fuel_tx_type'], true);
+    });
+
+    $('.removeFuel').off();
+    $('.removeFuel').click(function(e) {
+        e.preventDefault();
+
+        var thisTr = $(this).parents('tr');
+
+        Swal.fire({
+            html                        : '<span class="text-danger">Remove Fuel from Voucher?<span>',
+            icon                        : 'question',
+            background                  : 'rgba(0,0,0,.8)',
+            backdrop                    : 'rgba(0,0,0,.6)',
+            buttonsStyling              : false,
+            confirmButtonText           : 'Remove',
+            customClass                 : {
+                'confirmButton'             : 'btn btn-danger text-uppercase',
+                'cancelButton'              : 'ml-2 btn btn-secondary text-uppercase',
+            },
+            showCancelButton            : true,
+            keydownListenerCapture      : true,
+            allowOutsideClick           : true,
+            allowEscapeKey              : true,
+            didOpen                     : function() {
+                window['dataCollection'].env.sounds.swalSound.play();
+            }
+        }).then((result) => {
+            if (result.value) {
+                var postData = { };
+                postData[$('#security-token').attr('name')] = $('#security-token').val();
+                postData['id'] = $(this).data('id');
+
+                $.post('{{links.url("jobs/removeJobsFuel")}}', postData, function(response) {
+                    if (response.tokenKey && response.token) {
+                        $("#security-token").attr("name", response.tokenKey);
+                        $("#security-token").val(response.token);
+                    }
+
+                    if (response.responseCode === 0) {
+                        dataCollectionSectionForm['vars']['fuelsTable'].row(thisTr).remove().draw();
+                        delete(dataCollectionSectionForm['vars']['job']['expenses'][postData['id']]);
+
+                        var currentFuels = $('#{{componentId}}-{{sectionId}}-expenses').val();
+                        currentFuels = currentFuels - 1;
+
+                        if (currentFuels === 0) {
+                            $('#{{componentId}}-{{sectionId}}-expenses').val('');
+                        }
+
+                        paginatedPNotify('success', {
+                            text : response.responseMessage
+                        });
+
+                        dataCollectionSectionForm['funcs']['updateCounters']('expenses');
+                    } else if (response.responseCode === 1) {
+                        paginatedPNotify('error', {
+                            text : response.responseMessage
+                        });
+                    }
+                }, 'json');
+            }
+        });
+    });
+}
+
+dataCollectionSectionForm['funcs']['resetFuelsForm'] = function(txType = null, edit = false) {
+    if (txType) {
+        if (txType == '1') {//Cash
+            $('#fuel-stations').attr('hidden', false);
+            $('#fuel-vehicles').attr('hidden', true);
+            $('#{{componentId}}-{{sectionId}}-vendor_id').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-from_route_location').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-to_route_location').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-open_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-close_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-total_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-kmpl').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-average').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_rate').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_amount').attr('disabled', false);
+            if (!edit) {
+                $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-from_route_location').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-to_route_location').val(0).trigger('change');
+            }
+        } else if (txType == '2') {//Online
+            $('#fuel-stations').attr('hidden', false);
+            $('#fuel-vehicles').attr('hidden', true);
+            $('#{{componentId}}-{{sectionId}}-vendor_id').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-from_route_location').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-to_route_location').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-open_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-close_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-total_odo_reading').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-kmpl').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-average').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_rate').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_amount').attr('disabled', false);
+            if (!edit) {
+                $('#{{componentId}}-{{sectionId}}-from_route_location').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-to_route_location').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val(0).trigger('change');
+            }
+        } else if (txType == '3') {//Transfer
+            $('#fuel-stations').attr('hidden', true);
+            $('#fuel-vehicles').attr('hidden', false);
+            $('#{{componentId}}-{{sectionId}}-from_route_location').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-to_route_location').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').attr('disabled', false);
+            $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-open_odo_reading').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-close_odo_reading').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-total_odo_reading').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-kmpl').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-average').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-fuel_rate').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-fuel_amount').attr('disabled', true);
+            if (!edit) {
+                $('#{{componentId}}-{{sectionId}}-vendor_id').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-from_route_location').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-to_route_location').val(0).trigger('change');
+                $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val(0).trigger('change');
+            }
+        }
+
+        $('#{{componentId}}-{{sectionId}}-fuel_qty').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-fuel_notes').attr('disabled', false);
+        $('#{{componentId}}-{{sectionId}}-fuels-add').attr('disabled', false);
+
+        if (edit) {
+            $('#{{componentId}}-{{sectionId}}-fuels-add').attr('hidden', true);
+            $('#{{componentId}}-{{sectionId}}-fuels-add').attr('disabled', true);
+            $('#{{componentId}}-{{sectionId}}-fuels-update').attr('hidden', false);
+            $('#{{componentId}}-{{sectionId}}-fuels-update').attr('disabled', false);
+        }
+
+        return;
+    }
+
+    $('#{{componentId}}-{{sectionId}}-fuel_id').val('');
+    $('#{{componentId}}-{{sectionId}}-fuel_tx_type').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').val('');
+    $('#{{componentId}}-{{sectionId}}-from_route_location').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-from_route_location').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-to_route_location').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-to_route_location').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-vendor_id').val(0).trigger('change');
+    $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val(0).trigger('change');
+    dataCollectionSection['{{componentId}}-{{sectionId}}-fill_transfer_date']['flatpickr'].setDate('today');
+    $('#{{componentId}}-{{sectionId}}-open_odo_reading').val('');
+    $('#{{componentId}}-{{sectionId}}-close_odo_reading').val('');
+    $('#{{componentId}}-{{sectionId}}-total_odo_reading').val('');
+    $('#{{componentId}}-{{sectionId}}-kmpl').val('');
+    $('#{{componentId}}-{{sectionId}}-average').val('');
+    $('#{{componentId}}-{{sectionId}}-fuel_qty').val('');
+    $('#{{componentId}}-{{sectionId}}-fuel_rate').val('');
+    $('#{{componentId}}-{{sectionId}}-fuel_amount').val('');
+    $('#{{componentId}}-{{sectionId}}-fuel_notes').val('');
+    $('#{{componentId}}-{{sectionId}}-fuels-add').attr('hidden', false);
+    $('#{{componentId}}-{{sectionId}}-fuels-add').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuels-update').attr('hidden', true);
+    $('#{{componentId}}-{{sectionId}}-fuels-update').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-vendor_id').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-open_odo_reading').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-close_odo_reading').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-total_odo_reading').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-kmpl').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-average').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuel_qty').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuel_rate').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuel_amount').attr('disabled', true);
+    $('#{{componentId}}-{{sectionId}}-fuel_notes').attr('disabled', true);
+    $('#fuel-stations').attr('hidden', false);
+    $('#fuel-vehicles').attr('hidden', true);
+}
+
+dataCollectionSectionForm['funcs']['addUpdateFuels'] = function() {
+    $('#{{componentId}}-{{sectionId}}-fuels-add, #{{componentId}}-{{sectionId}}-fuels-update, #{{componentId}}-{{sectionId}}-fuels-cancel').off();
+    $('#{{componentId}}-{{sectionId}}-fuels-add, #{{componentId}}-{{sectionId}}-fuels-update, #{{componentId}}-{{sectionId}}-fuels-cancel').click(function(e) {
+        e.preventDefault();
+
+        var thisId = $(this)[0].id;
+
+        if (thisId === '{{componentId}}-{{sectionId}}-fuels-cancel') {
+            dataCollectionSectionForm['funcs']['resetFuelsForm']();
+        }
+
+        if (thisId === '{{componentId}}-{{sectionId}}-fuels-add' ||
+            thisId === '{{componentId}}-{{sectionId}}-fuels-update'
+        ) {
+            var thisButton = $(this);
+
+            var url;
+            var postData = { };
+            postData[$('#security-token').attr('name')] = $('#security-token').val();
+
+            if (thisId === '{{componentId}}-{{sectionId}}-fuels-add') {
+                url = '{{links.url("jobs/addJobsFuel")}}';
+            }
+            if (thisId === '{{componentId}}-{{sectionId}}-fuels-update') {
+                url = '{{links.url("jobs/updateJobsFuel")}}';
+                postData['id'] = $('#{{componentId}}-{{sectionId}}-fuel_id').val();
+            }
+
+            postData['lr_no'] = $('#{{componentId}}-{{sectionId}}-id').val();
+            postData['voucher_no'] = $('#{{componentId}}-{{sectionId}}-voucher_no').val();
+            postData['vehicle_id'] = $('#{{componentId}}-{{sectionId}}-vehicle_id').val();
+            postData['fuel_tx_type'] = $('#{{componentId}}-{{sectionId}}-fuel_tx_type').val();
+            if (postData['fuel_tx_type'] != '3') {
+                postData['fuel_payment_tx_id'] = $('#{{componentId}}-{{sectionId}}-fuel_payment_tx_id').val();
+                postData['from_route_location'] = $('#{{componentId}}-{{sectionId}}-from_route_location').val();
+                postData['to_route_location'] = $('#{{componentId}}-{{sectionId}}-to_route_location').val();
+                postData['vendor_id'] = $('#{{componentId}}-{{sectionId}}-vendor_id').val();
+                postData['open_odo_reading'] = $('#{{componentId}}-{{sectionId}}-open_odo_reading').val();
+                postData['close_odo_reading'] = $('#{{componentId}}-{{sectionId}}-close_odo_reading').val();
+                postData['total_odo_reading'] = $('#{{componentId}}-{{sectionId}}-total_odo_reading').val();
+                postData['kmpl'] = $('#{{componentId}}-{{sectionId}}-kmpl').val();
+                postData['average'] = $('#{{componentId}}-{{sectionId}}-average').val();
+                postData['rate'] = $('#{{componentId}}-{{sectionId}}-fuel_rate').val();
+                postData['amount'] = $('#{{componentId}}-{{sectionId}}-fuel_amount').val();
+            } else {
+                postData['transfer_to_vehicle_id'] = $('#{{componentId}}-{{sectionId}}-transfer_to_vehicle_id').val();
+            }
+
+            postData['fill_transfer_date'] = $('#{{componentId}}-{{sectionId}}-fill_transfer_date').val();
+            postData['quantity'] = $('#{{componentId}}-{{sectionId}}-fuel_qty').val();
+            postData['fuel_notes'] = $('#{{componentId}}-{{sectionId}}-fuel_notes').val();
+
+            if (postData['voucher_no'] === '' || postData['voucher_no'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter voucher #'});
+                return;
+            }
+            if (!postData['fuel_tx_type'] || postData['fuel_tx_type'] === '' || postData['fuel_tx_type'] == 0) {
+                paginatedPNotify('error', {text : 'Please select transaction type'});
+                return;
+            }
+            if (postData['fuel_tx_type'] != '3') {
+                if (!postData['vendor_id'] || postData['vendor_id'] === '' || postData['vendor_id'] == 0) {
+                    paginatedPNotify('error', {text : 'Please select fuel station'});
+                    return;
+                }
+                if (postData['open_odo_reading'] === '' || postData['open_odo_reading'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct open odo reading'});
+                    return;
+                }
+                if (postData['close_odo_reading'] === '' || postData['close_odo_reading'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct close odo reading'});
+                    return;
+                }
+                if (postData['total_odo_reading'] === '' || postData['total_odo_reading'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct total odo reading'});
+                    return;
+                }
+                if (postData['kmpl'] === '' || postData['kmpl'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct kmp/l'});
+                    return;
+                }
+                if (postData['average'] === '' || postData['average'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct average'});
+                    return;
+                }
+                if (postData['rate'] === '' || postData['rate'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct rate'});
+                    return;
+                }
+                if (postData['amount'] === '' || postData['amount'] == '0') {
+                    paginatedPNotify('error', {text : 'Please enter correct amount'});
+                    return;
+                }
+            } else {
+                if (!postData['transfer_to_vehicle_id'] || postData['transfer_to_vehicle_id'] === '' || postData['transfer_to_vehicle_id'] == 0) {
+                    paginatedPNotify('error', {text : 'Please select transfer to vehicle'});
+                    return;
+                }
+            }
+            if (postData['fill_transfer_date'] === '' || postData['fill_transfer_date'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter date'});
+                return;
+            }
+            if (postData['quantity'] === '' || postData['quantity'] == '0') {
+                paginatedPNotify('error', {text : 'Please enter correct quantity'});
+                return;
+            }
+            // $(this).attr('disabled', true);
+            // $(this).children('i').attr('hidden', false);
+
+            $.post(url, postData, function(response) {
+                if (response.tokenKey && response.token) {
+                    $("#security-token").attr("name", response.tokenKey);
+                    $("#security-token").val(response.token);
+                }
+
+                if (response.responseCode === 0) {
+                    var fuel = { };
+                    var newFuel = false;
+                    var fuelRow = { };
+
+                    var currentFuels = $('#{{componentId}}-{{sectionId}}-fuels').val();
+
+                    if (response.responseData.newFuel) {
+                        newFuel = true;
+                        fuel = response.responseData.newFuel;
+                        currentFuels = currentFuels + 1;
+                        $('#{{componentId}}-{{sectionId}}-fuels').val(currentFuels);
+                        $('#{{componentId}}-{{sectionId}}-fuels').valid();
+                    } else if (response.responseData.updatedFuel) {
+                        fuel = response.responseData.updatedFuel;
+                    }
+
+                    fuelRow['tt'] = dataCollectionSectionForm['vars']['fuelTransactionTypes'][fuel['fuel_tx_type']]['name'];
+
+                    if (fuel['fill_transfer_date'] && fuel['fill_transfer_date'] !== '') {
+                        fuelRow['ftd'] = fuel['fill_transfer_date'];
+                    } else {
+                        fuelRow['ftd'] = '-';
+                    }
+
+
+                    if (fuel['fuel_tx_type'] != '3') {
+                        if (dataCollectionSectionForm['vars']['vendors'][fuel['vendor_id']]) {
+                            fuelRow['to'] = dataCollectionSectionForm['vars']['vendors'][fuel['vendor_id']]['name'];
+                        } else {
+                            fuelRow['to'] = fuel['vendor_id'];
+                        }
+                    } else {
+                        if (dataCollectionSectionForm['vars']['vehicles'][fuel['transfer_to_vehicle_id']]) {
+                            fuelRow['to'] = dataCollectionSectionForm['vars']['vehicles'][fuel['transfer_to_vehicle_id']]['registration_no'];
+                        } else {
+                            fuelRow['to'] = fuel['transfer_to_vehicle_id'];
+                        }
+                    }
+
+                    if (fuel['open_odo_reading'] && fuel['open_odo_reading'] != '0') {
+                        fuelRow['oor'] = fuel['open_odo_reading'];
+                    } else {
+                        fuelRow['oor'] = '-';
+                    }
+                    if (fuel['open_odo_reading'] && fuel['open_odo_reading'] != '0') {
+                        fuelRow['oor'] = fuel['open_odo_reading'];
+                    } else {
+                        fuelRow['oor'] = '-';
+                    }
+
+                    if (fuel['close_odo_reading'] && fuel['close_odo_reading'] != '0') {
+                        fuelRow['cor'] = fuel['close_odo_reading'];
+                    } else {
+                        fuelRow['cor'] = '-';
+                    }
+                    if (fuel['close_odo_reading'] && fuel['close_odo_reading'] != '0') {
+                        fuelRow['cor'] = fuel['close_odo_reading'];
+                    } else {
+                        fuelRow['cor'] = '-';
+                    }
+
+                    if (fuel['total_odo_reading'] && fuel['total_odo_reading'] != '0') {
+                        fuelRow['tor'] = fuel['total_odo_reading'];
+                    } else {
+                        fuelRow['tor'] = '-';
+                    }
+                    if (fuel['total_odo_reading'] && fuel['total_odo_reading'] != '0') {
+                        fuelRow['tor'] = fuel['total_odo_reading'];
+                    } else {
+                        fuelRow['tor'] = '-';
+                    }
+
+                    if (fuel['kmpl'] && fuel['kmpl'] != '0') {
+                        fuelRow['kmpl'] = fuel['kmpl'];
+                    } else {
+                        fuelRow['kmpl'] = '-';
+                    }
+
+                    if (fuel['average'] && fuel['average'] != '0') {
+                        fuelRow['avg'] = fuel['average'];
+                    } else {
+                        fuelRow['avg'] = '-';
+                    }
+
+                    if (fuel['quantity'] && fuel['quantity'] != '0') {
+                        fuelRow['qty'] = fuel['quantity'];
+                    } else {
+                        fuelRow['qty'] = '-';
+                    }
+
+                    if (fuel['rate'] && fuel['rate'] != '0') {
+                        fuelRow['rate'] = fuel['rate'];
+                    } else {
+                        fuelRow['rate'] = '-';
+                    }
+
+                    if (fuel['amount'] && fuel['amount'] != '0') {
+                        fuelRow['amount'] = fuel['amount'];
+                    } else {
+                        fuelRow['amount'] = '-';
+                    }
+
+                    var fromRouteLocation = fuel['from_route_location'];
+                    var toRouteLocation = fuel['to_route_location'];
+                    if (dataCollectionSectionForm['vars']['job']['trip']['route']) {
+                        for (var route in dataCollectionSectionForm['vars']['job']['trip']['route']) {
+                            if (dataCollectionSectionForm['vars']['job']['trip']['route'][route]['city_id'] == fuel['from_route_location']) {
+                                fromRouteLocation = dataCollectionSectionForm['vars']['job']['trip']['route'][route]['city_name'];
+                            }
+                            if (dataCollectionSectionForm['vars']['job']['trip']['route'][route]['city_id'] == fuel['to_route_location']) {
+                                toRouteLocation = dataCollectionSectionForm['vars']['job']['trip']['route'][route]['city_name'];
+                            }
+                        }
+                    }
+                    if (fromRouteLocation && fromRouteLocation != '0') {
+                        fuelRow['frl'] = fromRouteLocation;
+                    } else {
+                        fuelRow['frl'] = '-';
+                    }
+                    if (toRouteLocation && toRouteLocation != '0') {
+                        fuelRow['trl'] = toRouteLocation;
+                    } else {
+                        fuelRow['trl'] = '-';
+                    }
+
+                    if (fuel['fuel_notes'] && fuel['fuel_notes'] !== '') {
+                        fuelRow['notes'] = 'Y';
+                    } else {
+                        fuelRow['notes'] = '-';
+                    }
+
+                    fuelRow['actions'] =
+                        '<button class="btn btn-xs btn-warning mr-1 editFuel text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-edit-' + fuel['id'] +
+                        '" data-id="' + fuel['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-edit"></i></button>' +
+                        '<button class="btn btn-xs btn-danger mr-1 removeFuel text-white" ' +
+                        'id="{{componentId}}-{{sectionId}}-remove-' + fuel['id'] +
+                        '" data-id="' + fuel['id'] +
+                        '" data-toggle="tooltip" data-html="true" data-placement="auto" title="" role="button"' +
+                        ' data-original-title=""><i class="fas fa-fw fa-trash"></i> </button>';
+                    fuelRow['DT_RowId'] = fuel['id'];
+
+                    if (newFuel) {
+                        dataCollectionSectionForm['vars']['fuelsTable'].row.add(fuelRow).draw();
+                    } else {
+                        for (var row in dataCollectionSectionForm['vars']['fuelsTable'].rows().data()) {
+                            if (dataCollectionSectionForm['vars']['fuelsTable'].rows().data()[row]['DT_RowId'] == fuel['id']) {
+                                dataCollectionSectionForm['vars']['fuelsTable'].row(row).data(fuelRow).draw();
+
+                                break;
+                            }
+                        }
+                    }
+
+                    dataCollectionSectionForm['funcs']['resetFuelsButtons']();
+                    dataCollectionSectionForm['funcs']['resetFuelsForm']();
+                    dataCollectionSectionForm['funcs']['updateCounters']('fuels');
+                    if (!dataCollectionSectionForm['vars']['job']['fuels']) {
+                        dataCollectionSectionForm['vars']['job']['fuels'] = { };
+                    }
+                    dataCollectionSectionForm['vars']['job']['fuels'][fuel['id']] = fuel;
+
+                    paginatedPNotify('success', {
+                        text : response.responseMessage
+                    });
+                } else if (response.responseCode === 1) {
+                    paginatedPNotify('error', {
+                        text : response.responseMessage
+                    });
+                }
+                thisButton.attr('disabled', false);
+                thisButton.children('i').attr('hidden', true);
+            }, 'json');
+        }
+    });
+}
+
+dataCollectionSectionForm['funcs']['updateCounters'] = function(type) {
+    if (type === 'expenses') {
+        var expensesRows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
+        var totalExpenses = 0;
+
+        if (expensesRows.length > 0) {
+            $(expensesRows).each(function(index, expenseRow) {
+                if (parseInt(expenseRow.amount) > 0) {
+                    totalExpenses += parseInt(expenseRow.amount);
+                }
+            });
+        }
+
+        $('#{{componentId}}-{{sectionId}}-queue-total_expenses_amount .badge').html("{{currencySymbol}} " + totalExpenses);
+    } else if (type === 'fuels') {
+        var fuelRows = dataCollectionSectionForm['vars']['fuelsTable'].rows().data().toArray();
+        var totalFuels = 0;
+
+        if (fuelRows.length > 0) {
+            $(fuelRows).each(function(index, fuelRow) {
+                if (parseInt(fuelRow.amount) > 0) {
+                    totalFuels += parseInt(fuelRow.amount);
+                }
+            });
+        }
+
+        $('#{{componentId}}-{{sectionId}}-queue-total_fuel_amount .badge').html("{{currencySymbol}} " + totalFuels);
+    }
 }
 
 dataCollectionSectionForm['funcs']['getNextVoucher'] = function() {
@@ -1519,6 +2115,25 @@ dataCollectionSection =
 
                     $('#from_company_details_noinfo').attr('hidden', true);
                     $('#from_company_details_info').attr('hidden', false);
+
+                    var routeStart = { };
+                    routeStart['city_id'] = fromAddress['city_id'];
+                    routeStart['city_name'] = fromAddress['city_name'];
+                    routeStart['state_id'] = fromAddress['state_id'];
+                    routeStart['state_name'] = fromAddress['state_name'];
+
+                    // for (var route in dataCollectionSection["data"]["route"]) {
+                    //     if (routeStart['city_id'] === dataCollectionSection["data"]["route"][route]['city_id']) {
+                    //         delete(dataCollectionSection["data"]["route"][route]);
+                    //     }
+                    // }
+
+                    dataCollectionSection["data"]["route"] = Object.values(dataCollectionSection["data"]["route"]);
+
+                    dataCollectionSection["data"]["route"][0] = routeStart;
+
+                    dataCollectionSectionForm['funcs']['rebuildTripRoute']();
+                    dataCollectionSectionForm['funcs']['collectTripSortableData']();
                 });
             }
         },
@@ -1579,6 +2194,25 @@ dataCollectionSection =
 
                     $('#to_company_details_noinfo').attr('hidden', true);
                     $('#to_company_details_info').attr('hidden', false);
+
+                    var routeEnd = { };
+                    routeEnd['city_id'] = toAddress['city_id'];
+                    routeEnd['city_name'] = toAddress['city_name'];
+                    routeEnd['state_id'] = toAddress['state_id'];
+                    routeEnd['state_name'] = toAddress['state_name'];
+
+                    // for (var route in dataCollectionSection["data"]["route"]) {
+                    //     if (routeEnd['city_id'] === dataCollectionSection["data"]["route"][route]['city_id']) {
+                    //         delete(dataCollectionSection["data"]["route"][route]);
+                    //     }
+                    // }
+
+                    dataCollectionSection["data"]["route"] = Object.values(dataCollectionSection["data"]["route"]);
+
+                    dataCollectionSection["data"]["route"][dataCollectionSection["data"]["route"].length] = routeEnd;
+
+                    dataCollectionSectionForm['funcs']['rebuildTripRoute']();
+                    dataCollectionSectionForm['funcs']['collectTripSortableData']();
                 });
             }
         },
@@ -1657,7 +2291,8 @@ dataCollectionSection =
 
                     dataCollectionSectionForm['vars']['chargesTable'] = $('#{{componentId}}-{{sectionId}}-charges-table').DataTable({
                         columns: columns,
-                        order: false
+                        order: false,
+                        responsive: true
                     });
                 }
 
@@ -1692,7 +2327,7 @@ dataCollectionSection =
                         return false;
                     }
                     if (postData['financial_year'] === '') {
-                        paginatedPNotify('error', 'Please enter financial year in Lorry Receipt!');
+                        paginatedPNotify('error', 'Please enter financial year in Lorry Receipt');
 
                         return false;
                     }
@@ -1840,7 +2475,8 @@ dataCollectionSection =
                         ];
 
                     dataCollectionSectionForm['vars']['documentsTable'] = $('#{{componentId}}-{{sectionId}}-documents-table').DataTable({
-                        columns: columns
+                        columns: columns,
+                        responsive: true
                     });
                 }
 
@@ -1883,7 +2519,7 @@ dataCollectionSection =
                             return false;
                         }
                         if ($('#{{componentId}}-{{sectionId}}-financial_year').val() === '') {
-                            paginatedPNotify('error', 'Please enter financial year in Lorry Receipt!');
+                            paginatedPNotify('error', 'Please enter financial year in Lorry Receipt');
 
                             return false;
                         }
@@ -2065,8 +2701,6 @@ dataCollectionSection =
                 $('#{{componentId}}-{{sectionId}}-employee_id').on('select2:select', function(e) {
                     //If there are expenses on the current driver, we should display swal
                     //On confirmation move all expenses to Status 2 (carry forward)
-                    //eslint-disable-next-line
-                    console.log(e.params.data);
                     if (dataCollectionSectionForm['vars']['expensesTable']) {
                         var rows = dataCollectionSectionForm['vars']['expensesTable'].rows().data().toArray();
                         var noOfExpenses = rows.length;
@@ -2224,7 +2858,8 @@ dataCollectionSection =
 
                     dataCollectionSectionForm['vars']['expensesTable'] = $('#{{componentId}}-{{sectionId}}-expenses-table').DataTable({
                         columns: columns,
-                        order: false
+                        order: false,
+                        responsive: true
                     });
                 }
 
@@ -2246,12 +2881,197 @@ dataCollectionSection =
                 dataCollectionSectionForm['funcs']['updateCounters']('expenses');
             }
         },
+        '{{componentId}}-{{sectionId}}-fuel_id'                     : { },
+        '{{componentId}}-{{sectionId}}-fuel_tx_type'                : {
+            placeholder: "SELECT TRANSACTION TYPE"
+        },
+        '{{componentId}}-{{sectionId}}-fuel_payment_tx_id'          : { },
+        '{{componentId}}-{{sectionId}}-from_route_location'         : {
+            placeholder: "SELECT FROM ROUTE LOCATION"
+        },
+        '{{componentId}}-{{sectionId}}-to_route_location'           : {
+            placeholder: "SELECT TO ROUTE LOCATION"
+        },
+        '{{componentId}}-{{sectionId}}-vendor_id'                   : {
+            placeholder: "SELECT FUEL STATION"
+        },
+        '{{componentId}}-{{sectionId}}-transfer_to_vehicle_id'      : {
+            placeholder: "SELECT VEHICLE TO TRANSFER FUEL TO"
+        },
+        '{{componentId}}-{{sectionId}}-fill_transfer_date'          : {
+            altFormat           : "d-m-Y",
+            allowInput          : true,
+            static              : true,
+            minDate             : "01-01-2000",
+            defaultDate         : "today"
+        },
+        '{{componentId}}-{{sectionId}}-open_odo_reading'            : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-open_odo_reading').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-open_odo_reading').val() !== '') {
+                        var close = $('#{{componentId}}-{{sectionId}}-close_odo_reading').val();
+                        var kmpl =  $('#{{componentId}}-{{sectionId}}-kmpl').val();
+                        if (close === '') {
+                            close = 0;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-total_odo_reading')
+                            .val((close - $('#{{componentId}}-{{sectionId}}-open_odo_reading').val()).toFixed(2));
+
+                        if (kmpl !== '') {
+                            $('#{{componentId}}-{{sectionId}}-average')
+                                .val(($('#{{componentId}}-{{sectionId}}-total_odo_reading').val() / $('#{{componentId}}-{{sectionId}}-kmpl').val()).toFixed(1));
+                        }
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-total_odo_reading').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-close_odo_reading'           : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-close_odo_reading').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-close_odo_reading').val() !== '') {
+                        var open = $('#{{componentId}}-{{sectionId}}-open_odo_reading').val();
+                        var kmpl = $('#{{componentId}}-{{sectionId}}-kmpl').val();
+                        if (open === '') {
+                            open = 0;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-total_odo_reading')
+                            .val(($('#{{componentId}}-{{sectionId}}-close_odo_reading').val() - open).toFixed(1));
+
+                        if (kmpl !== '') {
+                            $('#{{componentId}}-{{sectionId}}-average')
+                                .val(($('#{{componentId}}-{{sectionId}}-total_odo_reading').val() / $('#{{componentId}}-{{sectionId}}-kmpl').val()).toFixed(1));
+                        }
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-total_odo_reading').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-total_odo_reading'           : { },
+        '{{componentId}}-{{sectionId}}-kmpl'                        : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-kmpl').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-kmpl').val() !== '') {
+                        var total = $('#{{componentId}}-{{sectionId}}-total_odo_reading').val();
+                        if (total === '') {
+                            total = 0;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-average')
+                            .val((total / $('#{{componentId}}-{{sectionId}}-kmpl').val()).toFixed(1));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-average').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-average'                     : { },
+        '{{componentId}}-{{sectionId}}-fuel_qty'                    : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-fuel_qty').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-fuel_qty').val() !== '') {
+                        var rate = $('#{{componentId}}-{{sectionId}}-fuel_rate').val();
+                        if (rate === '') {
+                            rate = 1;
+                        }
+                        if ($('#{{componentId}}-{{sectionId}}-fuel_tx_type').val() != '3') {
+                            $('#{{componentId}}-{{sectionId}}-fuel_amount')
+                                .val(($('#{{componentId}}-{{sectionId}}-fuel_qty').val() * rate).toFixed(2));
+                        }
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-fuel_amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-fuel_rate'                   : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-fuel_rate').keyup(function() {
+                    if ($('#{{componentId}}-{{sectionId}}-fuel_rate').val() !== '') {
+                        var qty = $('#{{componentId}}-{{sectionId}}-fuel_qty').val();
+                        if (qty === '') {
+                            qty = 1;
+                        }
+                        $('#{{componentId}}-{{sectionId}}-fuel_amount')
+                            .val(($('#{{componentId}}-{{sectionId}}-fuel_rate').val() * qty).toFixed(2));
+                    } else {
+                        $('#{{componentId}}-{{sectionId}}-fuel_amount').val('');
+                    }
+                });
+            }
+        },
+        '{{componentId}}-{{sectionId}}-fuel_amount'                 : { },
+        '{{componentId}}-{{sectionId}}-fuel_notes'                  : { },
+        '{{componentId}}-{{sectionId}}-fuels'                       : {
+            afterInit: function() {
+                $('#{{componentId}}-{{sectionId}}-fuels').attr('hidden', true);
+
+                if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#{{componentId}}-{{sectionId}}-fuels-table')) {
+                    var columns =
+                        [
+                            {data: 'tt', orderable: false},
+                            {data: 'ftd', orderable: false},
+                            {data: 'to', orderable: false},
+                            {data: 'oor', orderable: false},
+                            {data: 'cor', orderable: false},
+                            {data: 'tor', orderable: false},
+                            {data: 'kmpl', orderable: false},
+                            {data: 'avg', orderable: false},
+                            {data: 'qty', orderable: false},
+                            {data: 'rate', orderable: false},
+                            {data: 'amount', orderable: false},
+                            {data: 'frl', orderable: false},
+                            {data: 'trl', orderable: false},
+                            {data: 'notes', orderable: false},
+                        ];
+
+                    if (dataCollectionSectionForm['vars']['job']['status'] != '4') {
+                        columns.push({data: 'actions', orderable: false});
+                    }
+
+                    dataCollectionSectionForm['vars']['fuelsTable'] = $('#{{componentId}}-{{sectionId}}-fuels-table').DataTable({
+                        columns: columns,
+                        order: false,
+                        responsive: true
+                    });
+                    dataCollectionSectionForm['vars']['fuelsTable'].columns.adjust().responsive.recalc();
+                }
+
+                dataCollectionSectionForm['funcs']['resetFuelsButtons']();
+
+                $('#{{componentId}}-{{sectionId}}-fuel_tx_type').on('select2:select', function(e) {
+                    dataCollectionSectionForm['funcs']['resetFuelsForm'](e.params.data.id);
+                });
+
+                dataCollectionSectionForm['funcs']['addUpdateFuels']();
+                dataCollectionSectionForm['funcs']['updateCounters']('fuels');
+            }
+        },
         '{{componentId}}-{{sectionId}}-route_city_id'               : { },
         '{{componentId}}-{{sectionId}}-route_state_id'              : { },
         '{{componentId}}-{{sectionId}}-route_state_name'            : { },
-        '{{componentId}}-{{sectionId}}-route_city_name'             : {
+        '{{componentId}}-{{sectionId}}-route_city_name'             : { },
+        '{{componentId}}-{{sectionId}}-route'                       : {
             afterInit: function() {
-                dataCollectionSection["{{componentId}}-{{sectionId}}-form"]["autoCompleteCities"] =
+                dataCollectionSectionForm['vars']['route'] = Sortable.create(document.getElementById($("#trip-sortable-route")[0].id), {
+                    dataIdAttr : "data-route-seq",
+                    filter: '.locked',
+                    onEnd: function(e) {
+                        var totalRoutes = $("#trip-sortable-route h6").length;
+                        if (e.newIndex === 0 || e.newIndex === totalRoutes - 1) {
+                            paginatedPNotify('error', {title: 'To change start and end route, please change via consignor and consignee address.'});
+
+                            dataCollectionSectionForm['funcs']['rebuildTripRoute']();
+
+                            return false;
+                        }
+
+                        dataCollectionSectionForm['funcs']['collectTripSortableData']();
+                    }
+                });
+
+                dataCollectionSectionForm['vars']["autoCompleteCities"] =
                     new autoComplete({
                         data: {
                             src: async() => {
@@ -2343,62 +3163,12 @@ dataCollectionSection =
                 });
                 // On delete
                 $("#{{componentId}}-{{sectionId}}-route_city_name").on("input propertychange", function() {
-                    resetForm();
+                    dataCollectionSectionForm['funcs']['resetTripRouteForm']()
                 });
-
-                function resetForm(resetCityName = false) {
-                    $("#{{componentId}}-{{sectionId}}-route_city_id").val('');
-                    $("#{{componentId}}-{{sectionId}}-route_city_id").attr("value", '');
-                    if (resetCityName) {
-                        $("#{{componentId}}-{{sectionId}}-route_city_name").val('');
-                        $("#{{componentId}}-{{sectionId}}-route_city_name").attr("value", '');
-                    }
-                    $("#{{componentId}}-{{sectionId}}-route_state_id").val('');
-                    $("#{{componentId}}-{{sectionId}}-route_state_id").attr("value", '');
-                    $("#{{componentId}}-{{sectionId}}-route_state_name").val('');
-                    $("#{{componentId}}-{{sectionId}}-route_state_name").attr("value", '');
-                    $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').attr('disabled', true);
-                }
 
                 $("#{{componentId}}-{{sectionId}}-route_city_name").focusout(function() {
                     $("#{{componentId}}-{{sectionId}}-city_name_list").children("li").remove();
                 });
-
-                function rebuildTripRoute() {
-                    var html = '';
-                    var locked = '';
-
-                    for (var routes in dataCollectionSection["data"]["route"]) {
-                        if (Object.keys(dataCollectionSection["data"]["route"]).length === 3) {
-                            locked = 'locked';
-                        } else {
-                            if (routes == 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
-                                locked = 'locked';
-                            } else {
-                                locked = '';
-                            }
-                        }
-
-                        html +=
-                            '<h6 class="m-0 d-inline ' + locked + '" data-route-seq="' + routes + '" data-route-city-id="' + dataCollectionSection["data"]["route"][routes]["city_id"] +
-                            '" data-route-city-name="' + dataCollectionSection["data"]["route"][routes]["city_name"] + '" data-route-state-id="' +
-                            dataCollectionSection["data"]["route"][routes]["state_id"] + '" data-route-state-name="' + dataCollectionSection["data"]["route"][routes]["state_name"] +
-                            '"><span class="text-primary text-uppercase">' + dataCollectionSection["data"]["route"][routes]["city_name"] + ' (' +
-                            dataCollectionSection["data"]["route"][routes]["state_name"] + ')</span> ';
-
-                        if (routes != Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
-                            html +=
-                                ' <i class="text-success fa-solid fa-arrow-right"></i> ';
-                        }
-
-                        html +=
-                            '</h6>';
-                    }
-
-                    $('#trip-sortable-route').empty().html(html);
-
-                    resetForm(true);
-                }
 
                 $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').off();
                 $('#{{componentId}}-{{sectionId}}-add-city, #{{componentId}}-{{sectionId}}-remove-city').click(function(e) {
@@ -2417,56 +3187,19 @@ dataCollectionSection =
                     } else if ($(this)[0].id === '{{componentId}}-{{sectionId}}-remove-city') {
                         var cityId = parseInt($("#{{componentId}}-{{sectionId}}-route_city_id").val());
                         for (var routes in dataCollectionSection["data"]["route"]) {
-                            if (cityId === dataCollectionSection["data"]["route"][routes]['city_id']) {
-                                if (routes == 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
-                                    if (routes == 0) {
-                                        paginatedPNotify('error', {title: 'Can not remove start of trip'});
-                                    } else {
-                                        paginatedPNotify('error', {title: 'Can not remove end of trip'});
-                                    }
-
-                                    return;
-                                } else {
+                            if (routes != 0 || routes == Object.keys(dataCollectionSection["data"]["route"]).length - 1) {
+                                if (cityId === dataCollectionSection["data"]["route"][routes]['city_id']) {
                                     delete(dataCollectionSection["data"]["route"][routes]);
-
-                                    break;
                                 }
                             }
                         }
                         dataCollectionSection["data"]["route"] = Object.values(dataCollectionSection["data"]["route"]);
                     }
 
-                    rebuildTripRoute();
+                    dataCollectionSectionForm['funcs']['rebuildTripRoute']();
                 });
-            }
-        },
-        '{{componentId}}-{{sectionId}}-route'                       : {
-            afterInit: function() {
-                function collectTripSortableData() {
-                    if ($("#trip-sortable-route h6").length > 0) {
-                        var data = { };
-                        $("#trip-sortable-route h6").each(function(index, h6) {
-                            data[index] = { };
-                            data[index]['city_id'] = $(h6).data("route-city-id");
-                            data[index]['city_name'] = $(h6).data("route-city-name");
-                            data[index]['state_id'] = $(h6).data("route-state-id");
-                            data[index]['state_name'] = $(h6).data("route-state-name");
 
-                            dataCollectionSection["data"]["route"] = data;
-                        });
-                    }
-                }
-                collectTripSortableData();
-
-                var el = document.getElementById($("#trip-sortable-route")[0].id);
-                dataCollectionSectionForm['vars']['route'] = { };
-                dataCollectionSectionForm['vars']['route'] = Sortable.create(el, {
-                    dataIdAttr : "data-route-seq",
-                    filter: '.locked',
-                    onEnd: function(e) {
-                        collectTripSortableData();
-                    }
-                });
+                dataCollectionSectionForm['funcs']['collectTripSortableData']();
             }
         },
         '{{componentId}}-{{sectionId}}-form'                        : {
